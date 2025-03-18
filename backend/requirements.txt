@@ -1,0 +1,10 @@
+uvicorn==0.34.0
+fastapi==0.115.11
+sqladmin==0.20.1
+python-jose==3.4.0
+bcrypt==4.3.0
+pydantic-settings==2.8.1
+fastapi-storages==0.3.0
+pytz==2025.1
+email_validator==2.2.0
+aiosqlite==0.21.0

@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+
+{% block title %}
+<title>Вход</title>
+{% endblock %}
+
+{% block content %}
+<div class="main-wrapper">
+    <section id="login">
+        <div class="background">
+            <div class="shape"></div>
+            <div class="shape"></div>
+        </div>
+        <form method="post" id="login-form">
+            <h3>Вход</h3>
+            <div class="field-wrapper">
+                <label for="email">Email</label>
+                <input type="text" placeholder="Email" id="email">
+            </div>
+            <div class="field-wrapper">
+                <label for="password">Пароль</label>
+                <input type="password" placeholder="Пароль" id="password">
+            </div>
+            <button id="login-btn" type="button" class="sqr-btn custom-blue">Войти</button>
+        </form>
+
+    </section>
+</div>
+
+{% block js %}
+<script>
+    $(document).ready(function () {
+        $(document).off('click', '#login-btn').on('click', '#login-btn', function (e) {
+            $.ajax({
+                url: "/api/users/login",
+                data: JSON.stringify({
+                    email: $('#email').val(),
+                    password: $('#password').val()
+                }),
+                type: 'POST',
+                contentType: 'application/json',
+                success: function (data) {
+                    window.location.href = '/docs';
+                },
+                error: function (data) {
+                    console.log(data.responseJSON.detail)
+                    // Обработка и отображение ошибок
+                    if (data.responseJSON && data.responseJSON.detail) {
+                        let errors = data.responseJSON.detail;
+                        let errorMessage;
+                        try {
+                            errorMessage = errors.map(error => error.msg).join('; ');
+                        } catch (error) {
+                            errorMessage = data.responseJSON.detail
+                        }
+                        Swal.fire({
+                            title: "Ошибка заполнения формы",
+                            text: errorMessage,
+                            icon: 'error',
+                            showCancelButton: false,
+                            confirmButtonColor: '#3085d6',
+                            cancelButtonColor: '#d33',
+                            confirmButtonText: 'OK',
+                            cancelButtonText: 'Нет'
+                        }).then((result) => {
+                            // console.log(result)
+                        })
+                    }
+
+                }
+            });
+        })
+    })
+</script>
+{% endblock %}
+{% endblock %}
