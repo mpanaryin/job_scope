@@ -1,13 +1,14 @@
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import FastAPI, APIRouter
 from sqladmin import Admin
 from starlette.staticfiles import StaticFiles
 
-from src.auth.admin import UserAdmin
 from src.core.middlewares import SecurityMiddleware, AuthenticationMiddleware, JWTRefreshMiddleware
-from src.auth.api import api_router as auth_api_router, AuthUserCRUDRouter
+from src.auth.api import api_router as auth_api_router
 from src.auth.views import router as auth_view_router
+from src.users.api import UserCRUDRouter
+from src.users.admin import UserAdmin
 from src.db.engine import engine
 from src.db.utils import create_db_and_tables
 
@@ -31,6 +32,6 @@ app.mount('/src/static', StaticFiles(directory='src/static'), name='static')
 
 app.include_router(auth_api_router, prefix='/api', tags=["auth"])
 app.include_router(auth_view_router, prefix='/auth', tags=["auth"])
-app.include_router(AuthUserCRUDRouter().get_router(), prefix='/api/users', tags=["users"])
+app.include_router(UserCRUDRouter().get_router(), prefix='/api/users', tags=["users"])
 
 admin.add_view(UserAdmin)

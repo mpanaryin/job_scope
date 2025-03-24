@@ -33,6 +33,8 @@ class Settings(BaseSettings):
     DB_PORT: str | None = os.environ.get("DB_PORT")
     DATABASE_URI: AnyUrl | None = None
 
+    ELASTICSEARCH_URL: str = os.environ.get("ELASTICSEARCH_URL")
+
     @field_validator("DATABASE_URI")
     def assemble_db_connection(cls, v: str | None, info: ValidationInfo) -> Any:
         """Собираем соединение к БД"""

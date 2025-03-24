@@ -1,12 +1,11 @@
-from starlette import status
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
-from starlette.responses import JSONResponse, Response
+from starlette.responses import JSONResponse
 
 from src.auth.exceptions import RefreshTokenNotValid
 from src.auth.jwt import JWTAuth
 from src.auth.schemas import AnonymousUser
-from src.auth.services import UserService
+from src.users.services import UserService
 
 
 class JWTRefreshMiddleware(BaseHTTPMiddleware):

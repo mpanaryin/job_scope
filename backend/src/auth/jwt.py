@@ -9,8 +9,9 @@ from starlette.responses import Response
 
 from src.auth.config import auth_config
 from src.auth.exceptions import RefreshTokenNotValid
-from src.auth.schemas import JWTData, User
+from src.auth.schemas import JWTData
 from src.auth.transport.cookie import CookieTransport
+from src.users.schemas import User
 from src.utils.datetimes import get_timezone_now
 
 SecretType = str | SecretStr
@@ -228,5 +229,3 @@ class JWTAuth:
                 except IndexError:
                     header_token = None
         return cookie_token or header_token
-
-

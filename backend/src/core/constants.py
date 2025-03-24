@@ -1,3 +1,4 @@
+import re
 from enum import Enum
 
 DB_NAMING_CONVENTION = {
@@ -7,6 +8,8 @@ DB_NAMING_CONVENTION = {
     "fk": "%(table_name)s_%(column_0_name)s_fkey",
     "pk": "%(table_name)s_pkey",
 }
+
+STRONG_PASSWORD_PATTERN = re.compile(r"^(?=.*[\d])(?=.*[!@#$%^&*])[\w!@#$%^&*]{6,128}$")
 
 
 class Environment(str, Enum):
