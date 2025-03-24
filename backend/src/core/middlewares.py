@@ -15,10 +15,8 @@ class JWTRefreshMiddleware(BaseHTTPMiddleware):
         if access_data is None:
             try:
                 pre_auth.refresh_access_token()
-                print('обновили токен')
             except RefreshTokenNotValid:
                 # Не смогли обновить токен, продолжаем обычный запрос
-                print('не обновили токен')
                 ...
         response = await call_next(request)
         # Нужно проверить, остался ли refresh токен,
@@ -42,7 +40,7 @@ class AuthenticationMiddleware(BaseHTTPMiddleware):
             request.state.user = AnonymousUser()
         else:
             user = await UserService().get(token_data.user_id)
-            request.state.user = user
+            request.state.user = user or AnonymousUser()
         # Продолжение обработки запроса
         response = await call_next(request)
         return response

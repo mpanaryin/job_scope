@@ -32,12 +32,26 @@ class Settings(BaseSettings):
     DB_HOST: str | None = os.environ.get("DB_HOST")
     DB_PORT: str | None = os.environ.get("DB_PORT")
     DATABASE_URI: AnyUrl | None = None
+    ALEMBIC_DATABASE_URI: AnyUrl | None = None
 
     ELASTICSEARCH_URL: str = os.environ.get("ELASTICSEARCH_URL")
 
+    @staticmethod
+    def _build_dsn(scheme: str, values: dict) -> str:
+        """Формирует DSN строку"""
+        return str(
+            PostgresDsn.build(
+                scheme=scheme,
+                username=values.get("DB_USER"),
+                password=values.get("DB_PASSWORD"),
+                host=values.get("DB_HOST"),
+                port=int(values["DB_PORT"]) if values.get("DB_PORT") else None,
+                path=values.get("DB_NAME"),
+            )
+        )
+
     @field_validator("DATABASE_URI")
-    def assemble_db_connection(cls, v: str | None, info: ValidationInfo) -> Any:
-        """Собираем соединение к БД"""
+    def assemble_db_connection(cls, v: str | None, info: ValidationInfo) -> str:
         if isinstance(v, str):
             return v
         db_type = info.data.get("DB_TYPE")
@@ -46,18 +60,23 @@ class Settings(BaseSettings):
         elif db_type == "ASYNC_SQLITE":
             return f"sqlite+aiosqlite:///{info.data.get('DB_NAME')}.db"
         elif db_type == "POSTGRESQL":
-            scheme = "postgresql+psycopg"
+            return cls._build_dsn("postgresql+psycopg", info.data)
         elif db_type == "ASYNC_POSTGRESQL":
-            scheme = "postgresql+asyncpg"
-        else:
-            raise ValueError("Unsupported database type")
-        return PostgresDsn.build(
-            scheme=scheme,
-            username=info.data.get("DB_USER"),
-            password=info.data.get("DB_PASSWORD"),
-            host=info.data.get("DB_HOST"),
-            port=int(info.data.get("DB_PORT")) if info.data.get("DB_PORT") else None,
-        )
+            return cls._build_dsn("postgresql+asyncpg", info.data)
+        raise ValueError("Unsupported database type")
+
+    @field_validator("ALEMBIC_DATABASE_URI", mode="before")
+    def assemble_alembic_connection(cls, v: str | None, info: ValidationInfo) -> str:
+        if isinstance(v, str):
+            return v
+        db_type = info.data.get("DB_TYPE")
+        if db_type in ["SQLITE", "POSTGRESQL"]:
+            return info.data.get("DATABASE_URI")  # sync
+        elif db_type == "ASYNC_SQLITE":
+            return f"sqlite:///{info.data.get('DB_NAME')}.db"
+        elif db_type == "ASYNC_POSTGRESQL":
+            return cls._build_dsn("postgresql+psycopg", info.data)
+        raise ValueError("Unsupported DB_TYPE for alembic")
 
     SMTP_TLS: bool = True
     SMTP_PORT: int | None = None

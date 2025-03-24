@@ -20,7 +20,7 @@ async def lifespan(app: FastAPI):
     yield
 
 
-app = FastAPI(lifespan=lifespan)  # lifespan если нет alembic
+app = FastAPI()  # lifespan если нет alembic
 # Middleware обрабатываются в обратном порядке
 # JWTRefreshMiddleware -> AuthenticationMiddleware -> SecurityMiddleware
 app.add_middleware(SecurityMiddleware)

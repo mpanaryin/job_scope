@@ -8,3 +8,9 @@ fastapi-storages==0.3.0
 pytz==2025.1
 email_validator==2.2.0
 aiosqlite==0.21.0
+elasticsearch==8.17.2
+aiohttp==3.11.14
+uuid6==2024.7.10
+alembic==1.15.1
+asyncpg==0.30.0
+psycopg==3.2.6
