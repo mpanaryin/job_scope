@@ -11,6 +11,8 @@ from src.users.api import UserCRUDRouter
 from src.users.admin import UserAdmin
 from src.db.engine import engine
 from src.db.utils import create_db_and_tables
+from src.vacancies.admin import VacancyAdmin
+from src.vacancies.api import VacancyCRUDRouter
 
 
 @asynccontextmanager
@@ -33,5 +35,7 @@ app.mount('/src/static', StaticFiles(directory='src/static'), name='static')
 app.include_router(auth_api_router, prefix='/api', tags=["auth"])
 app.include_router(auth_view_router, prefix='/auth', tags=["auth"])
 app.include_router(UserCRUDRouter().get_router(), prefix='/api/users', tags=["users"])
+app.include_router(VacancyCRUDRouter().get_router(), prefix='/api/vacancies', tags=["vacancies"])
 
 admin.add_view(UserAdmin)
+admin.add_view(VacancyAdmin)

@@ -18,6 +18,12 @@ class PermissionDenied(DetailedHTTPException):
 
 class NotFound(DetailedHTTPException):
     STATUS_CODE = status.HTTP_404_NOT_FOUND
+    DETAIL = "Not found"
+
+
+class AlreadyExists(DetailedHTTPException):
+    STATUS_CODE = status.HTTP_400_BAD_REQUEST
+    DETAIL = "Already exists"
 
 
 class BadRequest(DetailedHTTPException):

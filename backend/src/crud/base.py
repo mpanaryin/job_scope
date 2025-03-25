@@ -158,7 +158,7 @@ class CRUDBase(metaclass=CRUDBaseMeta):
                     pk == value
                     for pk, value in zip(
                         target_pks,
-                        object_identifier_values(value, target),
+                        object_identifier_values(str(value), target),
                     )
                 )
             )
@@ -172,16 +172,16 @@ class CRUDBase(metaclass=CRUDBaseMeta):
         related_stmt = select(target).where(*conditions)
         return related_stmt
 
-    def _stmt_by_identifier(self, identifier: str) -> Select:
+    def _stmt_by_identifier(self, identifier: Any) -> Select:
         stmt = select(self.model)
         pks = get_primary_keys(self.model)
-        values = object_identifier_values(identifier, self.model)
+        values = object_identifier_values(str(identifier), self.model)
         conditions = [pk == value for (pk, value) in zip(pks, values)]
 
         return stmt.where(*conditions)
 
     def _set_many_to_one(self, obj: Any, relation: MODEL_PROPERTY, ident: Any) -> Any:
-        values = object_identifier_values(ident, relation.entity)
+        values = object_identifier_values(str(ident), relation.entity)
         pks = get_primary_keys(relation.entity)
 
         # ``relation.local_remote_pairs`` is ordered by the foreign keys
@@ -226,10 +226,10 @@ class CRUDBase(metaclass=CRUDBaseMeta):
                 setattr(obj, key, value)
         return obj
 
-    def _get_delete_stmt(self, pk: str) -> Select:
+    def _get_delete_stmt(self, pk: Any) -> Select:
         stmt = select(self.model)
         pks = get_primary_keys(self.model)
-        values = object_identifier_values(pk, self.model)
+        values = object_identifier_values(str(pk), self.model)
         conditions = [pk == value for (pk, value) in zip(pks, values)]
         return stmt.where(*conditions)
 

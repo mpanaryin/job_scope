@@ -1,10 +1,12 @@
-from typing import Callable, TypeVar
+from typing import Callable, TypeVar, Any
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
+from sqlalchemy.exc import IntegrityError
 from starlette.requests import Request
 
 from src.auth.permissions import access_control
+from src.core.exceptions import AlreadyExists, NotFound
 from src.crud.base import CRUDBase
 
 
@@ -16,7 +18,7 @@ class CRUDRouter:
     create_schema: Schema
     update_schema: Schema
     read_schema: Schema
-    router: APIRouter = APIRouter()
+    router: APIRouter
     methods: list[str] = frozenset(["GET", "POST", "PUT", "DELETE"])
     create_as_form: bool = False
     update_as_form: bool = False
@@ -27,21 +29,29 @@ class CRUDRouter:
             @self.router.post("/", response_model=self.read_schema)
             @self.access_control
             async def _create(request: Request, obj: self.create_schema = Depends(self.create_schema.as_form)):
-                db_obj = await self.crud.create(data=obj.dict(), request=request)
+                try:
+                    db_obj = await self.crud.create(data=obj.model_dump(), request=request)
+                except IntegrityError:
+                    raise AlreadyExists()
                 return db_obj
         else:
             @self.router.post("/", response_model=self.read_schema)
             @self.access_control
             async def _create(request: Request, obj: self.create_schema):
-                db_obj = await self.crud.create(data=obj.dict(), request=request)
+                try:
+                    db_obj = await self.crud.create(data=obj.model_dump(), request=request)
+                except IntegrityError:
+                    raise AlreadyExists()
                 return db_obj
         return _create
 
     def get(self) -> Callable:
         @self.router.get("/{pk}", response_model=self.read_schema)
         @self.access_control
-        async def _get(request: Request, pk: int):
+        async def _get(request: Request, pk: Any):
             db_obj = await self.crud.get(pk=pk)
+            if not db_obj:
+                raise NotFound()
             return db_obj
         return _get
 
@@ -57,29 +67,35 @@ class CRUDRouter:
         if self.update_as_form:
             @self.router.put("/{pk}", response_model=self.read_schema)
             @self.access_control
-            async def _update(request: Request, pk: int, obj: self.update_schema = Depends(self.update_schema.as_form)):
-                db_obj = await self.crud.update(
-                    pk=pk,
-                    data=obj.dict(exclude_unset=True),
-                    request=request
-                )
+            async def _update(request: Request, pk: Any, obj: self.update_schema = Depends(self.update_schema.as_form)):
+                try:
+                    db_obj = await self.crud.update(
+                        pk=pk,
+                        data=obj.model_dump(exclude_unset=True),
+                        request=request
+                    )
+                except AttributeError:
+                    raise NotFound()
                 return db_obj
         else:
             @self.router.put("/{pk}", response_model=self.read_schema)
             @self.access_control
-            async def _update(request: Request, pk: int, obj: self.update_schema):
-                db_obj = await self.crud.update(
-                    pk=pk,
-                    data=obj.dict(exclude_unset=True, exclude_defaults=True),
-                    request=request
-                )
+            async def _update(request: Request, pk: Any, obj: self.update_schema):
+                try:
+                    db_obj = await self.crud.update(
+                        pk=pk,
+                        data=obj.model_dump(exclude_unset=True, exclude_defaults=True),
+                        request=request
+                    )
+                except AttributeError:
+                    raise NotFound()
                 return db_obj
         return _update
 
     def delete(self) -> Callable:
         @self.router.delete("/{pk}", response_model=self.read_schema)
         @self.access_control
-        async def _delete(request: Request, pk: int):
+        async def _delete(request: Request, pk: Any):
             db_obj = await self.crud.delete(pk=pk, request=request)
             return db_obj
         return _delete
