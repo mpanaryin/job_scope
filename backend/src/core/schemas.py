@@ -1,40 +1,33 @@
-from datetime import datetime
-from typing import Any
+import datetime
 from zoneinfo import ZoneInfo
 
 from fastapi.encoders import jsonable_encoder
-from pydantic import BaseModel, ConfigDict, model_validator
-
-
-def convert_datetime_to_gmt(dt: datetime) -> str:
-    if not dt.tzinfo:
-        dt = dt.replace(tzinfo=ZoneInfo("Europe/Moscow"))
-
-    return dt.strftime("%Y-%m-%dT%H:%M:%S%z")
+from pydantic import BaseModel, model_validator
 
 
 class CustomModel(BaseModel):
-    model_config = ConfigDict(
-        json_encoders={datetime: convert_datetime_to_gmt},
-        populate_by_name=True,
-    )
+    @model_validator(mode="after")
+    def normalize_datetimes(self) -> "CustomModel":
+        """
+        Общая обработка datetime:
+        - если есть таймзона, привести к Europe/Moscow
+        - если нет — установить таймзону Moscow
+        - убрать микросекунды
+        """
+        tz_moscow = ZoneInfo("Europe/Moscow")
 
-    @model_validator(mode="before")
-    @classmethod
-    def set_null_microseconds(cls, data: dict[str, Any]) -> dict[str, Any] | bytes:
-        # Дополнительная проверка, так как сюда orm объекты попадают
-        if not isinstance(data, dict):
-            if isinstance(data, bytes):
-                return data
-            data = data.__dict__
-        datetime_fields = {
-            k: v.replace(microsecond=0)
-            for k, v in data.items()
-            if isinstance(v, datetime)
-        }
-        return {**data, **datetime_fields}
+        for field_name, value in self.__dict__.items():
+            if isinstance(value, datetime.datetime):
+                if value.tzinfo:
+                    value = value.astimezone(tz_moscow)
+                else:
+                    value = value.replace(tzinfo=tz_moscow)
+                value = value.replace(microsecond=0)
+                setattr(self, field_name, value)
+
+        return self
 
     def serializable_dict(self, **kwargs):
-        """Return a dict which contains only serializable fields."""
+        """Возвращает словарь, содержащий только сериализуемые поля."""
         default_dict = self.model_dump()
         return jsonable_encoder(default_dict)

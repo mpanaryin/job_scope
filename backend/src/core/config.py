@@ -83,14 +83,7 @@ class Settings(BaseSettings):
     SMTP_HOST: str | None = None
     SMTP_USER: str | None = None
     SMTP_PASSWORD: str | None = None
-    EMAILS_FROM_EMAIL: EmailStr | None = None
-    EMAILS_FROM_NAME: str | None = None
-
-    @field_validator("EMAILS_FROM_NAME")
-    def get_project_name(cls, v: str | None, info: ValidationInfo) -> str:
-        if not v:
-            return info.data["PROJECT_NAME"]
-        return v
+    EMAIL_FROM: EmailStr | None = None
 
     EMAIL_RESET_TOKEN_EXPIRE_HOURS: int = 48
     EMAIL_TEMPLATES_DIR: str = "/src/src/email-templates/build"

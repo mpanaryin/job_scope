@@ -30,13 +30,6 @@ class Vacancy(Base):
     salary_to: Mapped[int | None] = mapped_column(Integer, nullable=True)
     salary_currency: Mapped[str | None] = mapped_column(String(length=5), nullable=True)
     salary_gross: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
-    # Даты
-    published_at: Mapped[datetime.datetime] = mapped_column(
-        DateTime(timezone=True), nullable=False, index=True
-    )
-    created_at: Mapped[datetime.datetime] = mapped_column(
-        DateTime(timezone=True), default=get_timezone_now, index=True
-    )
     # Данные по работодателю
     area_name: Mapped[str | None] = mapped_column(String(length=256), nullable=True)
     employer_name: Mapped[str | None] = mapped_column(String(length=512), nullable=True)
@@ -49,6 +42,16 @@ class Vacancy(Base):
     is_archived: Mapped[bool] = mapped_column(Boolean, default=False, index=True, nullable=False)
     type: Mapped[str | None] = mapped_column(String(length=100), nullable=True)
     meta: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
+    # Даты
+    published_at: Mapped[datetime.datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, index=True
+    )
+    created_at: Mapped[datetime.datetime] = mapped_column(
+        DateTime(timezone=True), default=get_timezone_now, index=True
+    )
+    updated_at: Mapped[datetime.datetime] = mapped_column(
+        DateTime(timezone=True), default=get_timezone_now, onupdate=get_timezone_now, nullable=False
+    )
 
     __table_args__ = (
         UniqueConstraint('source_name', 'source_id', name='uq_vacancy_source'),

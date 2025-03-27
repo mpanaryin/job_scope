@@ -8,6 +8,7 @@ from src.db.utils import create_superuser
 
 
 async def main():
+    """Usage: python create_superuser.py <email> <password>"""
     if len(sys.argv) != 3:
         print("Usage: python create_superuser.py <email> <password>")
         return
