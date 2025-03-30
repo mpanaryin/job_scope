@@ -34,7 +34,7 @@ class Settings(BaseSettings):
     DATABASE_URI: AnyUrl | None = None
     ALEMBIC_DATABASE_URI: AnyUrl | None = None
 
-    ELASTICSEARCH_URL: str = os.environ.get("ELASTICSEARCH_URL")
+    ELASTICSEARCH_HOSTS: str = os.environ.get("ELASTICSEARCH_HOSTS")
 
     @staticmethod
     def _build_dsn(scheme: str, values: dict) -> str:

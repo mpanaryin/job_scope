@@ -3,7 +3,7 @@ from elasticsearch import AsyncElasticsearch
 from src.core.config import settings
 
 # Подключение к Elasticsearch
-es_client = AsyncElasticsearch(settings.ELASTICSEARCH_URL)
+es_client = AsyncElasticsearch(settings.ELASTICSEARCH_HOSTS)
 
 
 async def create_index():

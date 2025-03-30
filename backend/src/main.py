@@ -1,10 +1,14 @@
+import logging
+
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, APIRouter
+from fastapi import FastAPI
 from sqladmin import Admin
 from starlette.staticfiles import StaticFiles
 
+import src.core.logging_setup  # важно объявить до всех импортов
 from src.core.config import settings
+
 from src.core.middlewares import SecurityMiddleware, AuthenticationMiddleware, JWTRefreshMiddleware
 from src.auth.api import api_router as auth_api_router
 from src.auth.views import router as auth_view_router
@@ -17,10 +21,12 @@ from src.vacancies.admin import VacancyAdmin
 from src.vacancies.api import router as vacancies_router, VacancyCRUDRouter
 
 
+logger = logging.getLogger(__name__)
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Нужен только если нет alembic
-    await create_db_and_tables()
+    await create_db_and_tables()  # Нужен только если нет alembic
     yield
 
 
@@ -35,7 +41,7 @@ async def on_shutdown():
 app = FastAPI(
     title=settings.PROJECT_NAME,
     on_startup=[on_startup],
-    on_shutdown=[on_shutdown],
+    on_shutdown=[on_shutdown]
 )  # lifespan если нет alembic
 
 # Middleware обрабатываются в обратном порядке
@@ -44,14 +50,13 @@ app.add_middleware(SecurityMiddleware)
 app.add_middleware(AuthenticationMiddleware)
 app.add_middleware(JWTRefreshMiddleware)
 
-app.mount('/src/static', StaticFiles(directory='src/static'), name='static')
+app.mount("/static", StaticFiles(directory="/static"), name="static")
 
 app.include_router(auth_api_router, prefix='/api', tags=["auth"])
 app.include_router(auth_view_router, prefix='/auth', tags=["auth"])
 app.include_router(UserCRUDRouter().get_router(), prefix='/api/users', tags=["users"])
 app.include_router(vacancies_router, prefix='/api/vacancies', tags=["vacancies"])
 app.include_router(VacancyCRUDRouter().get_router(), prefix='/api/vacancies', tags=["vacancies"])
-
 
 admin = Admin(app, engine)
 admin.add_view(UserAdmin)

@@ -1,5 +1,4 @@
 worker_processes auto;
-error_log /var/log/nginx/error.log warn;
 pid /var/run/nginx.pid;
 
 events {
@@ -9,6 +8,9 @@ events {
 http {
     include       /etc/nginx/mime.types;
     default_type  application/octet-stream;
+
+    access_log /var/log/nginx/access.log;
+    error_log /var/log/nginx/error.log warn;
 
     # Включение sendfile для повышения производительности
     sendfile        on;
@@ -36,7 +38,7 @@ http {
 
         # Обслуживание статических файлов
         location /static/ {
-            alias /app/src/static/;
+            root /;
             autoindex off;
             expires max;
             add_header Cache-Control public;
@@ -44,7 +46,7 @@ http {
 
         # Обслуживание media-файлов
         location /media/ {
-            alias /app/media/;
+            root /;
             autoindex off;
             expires max;
             add_header Cache-Control public;
@@ -77,7 +79,7 @@ http {
 
         # Обслуживание статических файлов
         location /static/ {
-            alias /app/src/static/;
+            root /;
             autoindex off;
             expires max;
             add_header Cache-Control public;
@@ -85,7 +87,7 @@ http {
 
         # Обслуживание media-файлов
         location /media/ {
-            alias /app/media/;
+            root /;
             autoindex off;
             expires max;
             add_header Cache-Control public;

@@ -3,7 +3,7 @@ VACANCY_MAPPING = {
         "properties": {
             "id": {"type": "keyword"},
             "source": {
-                "type": "nested",
+                "type": "object",
                 "properties": {
                     "id": {"type": "keyword"},
                     "name": {"type": "keyword"},
@@ -13,7 +13,7 @@ VACANCY_MAPPING = {
             "url": {"type": "keyword"},
             "description": {"type": "text"},
             "area": {
-                "type": "nested",
+                "type": "object",
                 "properties": {
                     "id": {"type": "keyword"},
                     "name": {"type": "keyword"},
@@ -21,7 +21,7 @@ VACANCY_MAPPING = {
                 }
             },
             "address": {
-                "type": "nested",
+                "type": "object",
                 "properties": {
                     "city": {"type": "keyword"},
                     "street": {"type": "text"},
@@ -32,7 +32,7 @@ VACANCY_MAPPING = {
                 }
             },
             "employer": {
-                "type": "nested",
+                "type": "object",
                 "properties": {
                     "id": {"type": "keyword"},
                     "name": {"type": "text"},
@@ -41,7 +41,7 @@ VACANCY_MAPPING = {
                 }
             },
             "salary": {
-                "type": "nested",
+                "type": "object",
                 "properties": {
                     "currency": {"type": "keyword"},
                     "from": {"type": "integer"},
@@ -50,28 +50,28 @@ VACANCY_MAPPING = {
                 }
             },
             "experience": {
-                "type": "nested",
+                "type": "object",
                 "properties": {
                     "id": {"type": "keyword"},
                     "name": {"type": "text"}
                 }
             },
             "employment": {
-                "type": "nested",
+                "type": "object",
                 "properties": {
                     "id": {"type": "keyword"},
                     "name": {"type": "text"}
                 }
             },
             "schedule": {
-                "type": "nested",
+                "type": "object",
                 "properties": {
                     "id": {"type": "keyword"},
                     "name": {"type": "text"}
                 }
             },
             "snippet": {
-                "type": "nested",
+                "type": "object",
                 "properties": {
                     "requirement": {"type": "text"},
                     "responsibility": {"type": "text"}

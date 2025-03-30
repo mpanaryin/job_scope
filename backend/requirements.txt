@@ -14,3 +14,4 @@ uuid6==2024.7.10
 alembic==1.15.1
 asyncpg==0.30.0
 psycopg==3.2.6
+python-json-logger==3.3.0

@@ -4,6 +4,9 @@ services:
     command: uvicorn src.main:app --host 0.0.0.0 --port 8000
     volumes:
       - ./backend:/app
+      - ./backend/logs:/app/logs
+      - ./media:/media
+      - ./static:/static
     ports:
       - "8000:8000"
     env_file:
@@ -23,25 +26,41 @@ services:
 #      - "5432:5432"
 
   nginx:
-    build: ./nginx
+    build: ./infra/nginx
     env_file:
       - .env
     ports:
       - "80:80"
       - "443:443"
     volumes:
-      - ./backend/media:/app/media:ro
-      - ./backend/src/static:/app/src/static:ro
+      - ./media:/media:ro
+      - ./static:/static:ro
+      - ./backend/logs/nginx:/var/log/nginx
     depends_on:
       - app
+
+  logstash:
+    image: docker.elastic.co/logstash/logstash:8.17.3
+    container_name: logstash
+    env_file:
+      - .env
+    volumes:
+      - ./infra/elk/logstash/pipeline:/usr/share/logstash/pipeline
+      - ./infra/elk/logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml
+    ports:
+      - "5044:5044"
+    depends_on:
+      - elasticsearch
 
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.17.3
     container_name: elasticsearch
+    env_file:
+      - .env
     environment:
-      - discovery.type=single-node
-      - xpack.security.enabled=false  # Отключаем авторизацию для локальной разработки
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"  # Ограничение памяти
+      - discovery.type=${ES_DISCOVERY_TYPE}
+      - xpack.security.enabled=${ES_XPACK_SECURITY}  # Отключаем авторизацию для локальной разработки
+      - ES_JAVA_OPTS=${ES_JAVA_OPTS}  # Ограничение памяти
     ports:
       - "9200:9200"
     volumes:
@@ -50,12 +69,25 @@ services:
   kibana:
     image: docker.elastic.co/kibana/kibana:8.17.3
     container_name: kibana
+    env_file:
+      - .env
     depends_on:
       - elasticsearch
-    environment:
-      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
     ports:
       - "5601:5601"
+
+  filebeat:
+    build: ./infra/elk/filebeat
+    env_file:
+      - .env
+    depends_on:
+      - logstash
+      - app
+      - kibana
+    volumes:
+      - ./backend/logs:/app/logs  # Папка с логами приложения
+      - ./backend/logs/nginx:/var/log/nginx:ro  # Логи nginx
+    restart: on-failure
 
 volumes:
   postgres_data:
