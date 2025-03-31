@@ -4,7 +4,6 @@ from logging.handlers import TimedRotatingFileHandler
 
 
 LOG_DIR = "/app/logs"
-os.makedirs(LOG_DIR, exist_ok=True)
 log_file = os.path.join(LOG_DIR, "app.log")
 
 LOGGING_CONFIG = {

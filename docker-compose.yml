@@ -4,7 +4,7 @@ services:
     command: uvicorn src.main:app --host 0.0.0.0 --port 8000
     volumes:
       - ./backend:/app
-      - ./backend/logs:/app/logs
+      - ./logs/fastapi:/app/logs
       - ./media:/media
       - ./static:/static
     ports:
@@ -22,6 +22,9 @@ services:
       - .env
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./infra/postgresql/postgresql.conf:/etc/postgresql/postgresql.conf:ro
+      - ./logs/postgresql:/var/log/postgresql
+    command: postgres -c config_file=/etc/postgresql/postgresql.conf
 #    ports:
 #      - "5432:5432"
 
@@ -35,7 +38,7 @@ services:
     volumes:
       - ./media:/media:ro
       - ./static:/static:ro
-      - ./backend/logs/nginx:/var/log/nginx
+      - ./logs/nginx:/var/log/nginx
     depends_on:
       - app
 
@@ -81,12 +84,13 @@ services:
     env_file:
       - .env
     depends_on:
-      - logstash
       - app
+      - logstash
       - kibana
     volumes:
-      - ./backend/logs:/app/logs  # Папка с логами приложения
-      - ./backend/logs/nginx:/var/log/nginx:ro  # Логи nginx
+      - ./logs/fastapi:/app/logs:ro  # Папка с логами приложения
+      - ./logs/nginx:/var/log/nginx:ro  # Логи nginx
+      - ./logs/postgresql:/var/log/postgresql:ro
     restart: on-failure
 
 volumes:
