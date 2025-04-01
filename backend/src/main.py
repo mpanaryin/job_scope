@@ -3,6 +3,7 @@ import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from prometheus_fastapi_instrumentator import Instrumentator
 from sqladmin import Admin
 from starlette.staticfiles import StaticFiles
 
@@ -30,6 +31,7 @@ async def lifespan(app: FastAPI):
     yield
 
 
+
 async def on_startup():
     AiohttpClient.get_aiohttp_client()
 
@@ -49,6 +51,7 @@ app = FastAPI(
 app.add_middleware(SecurityMiddleware)
 app.add_middleware(AuthenticationMiddleware)
 app.add_middleware(JWTRefreshMiddleware)
+Instrumentator().instrument(app).expose(app, endpoint='/__internal_metrics__')
 
 app.mount("/static", StaticFiles(directory="/static"), name="static")
 

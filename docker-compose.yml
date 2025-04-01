@@ -93,7 +93,67 @@ services:
       - ./logs/postgresql:/var/log/postgresql:ro
     restart: on-failure
 
+  prometheus:
+    image: prom/prometheus:v3.2.1
+    container_name: prometheus
+    volumes:
+      - prometheus_data:/prometheus
+      - ./infra/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    depends_on:
+      - app
+
+  grafana:
+    image: grafana/grafana:11.6.0
+    container_name: grafana
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./infra/grafana/provisioning:/etc/grafana/provisioning
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    depends_on:
+      - prometheus
+
+  node_exporter:
+    image: prom/node-exporter:latest
+#    ports:
+#      - "9100:9100"
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+
+  postgres_exporter:
+    image: prometheuscommunity/postgres-exporter:latest
+    container_name: postgres_exporter
+    env_file:
+      - .env
+    environment:
+      DATA_SOURCE_NAME: postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:5432/postgres?sslmode=disable
+#    ports:
+#      - "9187:9187"
+    restart: always
+    depends_on:
+      - db
+
+  nginx_exporter:
+    image: nginx/nginx-prometheus-exporter:latest
+    container_name: nginx_exporter
+    command:
+      - '-nginx.scrape-uri=http://nginx/stub_status'
+#    ports:
+#     - "9113:9113"
+    restart: always
+    depends_on:
+      - nginx
+
 volumes:
   postgres_data:
   elastic_data:
     driver: local
+  prometheus_data:
+  grafana_data:
