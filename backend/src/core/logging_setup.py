@@ -101,6 +101,16 @@ LOGGING_CONFIG = {
             'level': 'INFO',
             'propagate': False
         },
+        'celery': {
+            'handlers': ['stream_standard_handler', 'file_handler'],
+            'level': 'INFO',
+            'propagate': False
+        },
+        'celery.worker': {
+            'handlers': ['stream_standard_handler', 'file_handler'],
+            'level': 'INFO',
+            'propagate': False
+        },
     },
 }
 

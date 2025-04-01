@@ -167,5 +167,5 @@ cython_debug/
 *.db
 
 # Logs
-*.log
+*.log*
 /logs/postgresql/*.json

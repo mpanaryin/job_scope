@@ -8,30 +8,18 @@ from src.integrations.headhunter.service import hh_service
 from src.integrations.headhunter.schemas import request as hh_request_schemas
 from src.integrations.headhunter.schemas import response as hh_response_schemas
 from src.vacancies.mappers import hh_vacancy
-from src.vacancies.mappers.hh_vacancy import map_hh_vacancies_to_elastic_vacancies
 from src.vacancies.orm import Vacancy
 from src.vacancies.schemas import VacancyCreate
 
 
-async def collect_vacancies():
+async def collect_vacancies(search_params: hh_request_schemas.VacancySearchParams):
     """Сбор вакансий из различных агрегаторов"""
-    python_backend_params = hh_request_schemas.VacancySearchParams(
-        page=0,
-        per_page=1,
-        text='Backend python developer',
-        area=['1'],  # Moscow,
-        order_by='publication_time'
-    )
-    vacancies: list[hh_response_schemas.VacancyItem] = await hh_service.get_all_vacancies(python_backend_params)
+    vacancies: list[hh_response_schemas.VacancyItem] = await hh_service.get_all_vacancies(search_params)
 
     # Добавление вакансий в базу
-    db_vacancies = hh_vacancy.map_hh_vacancies_to_domain_vacancies(vacancies)
-    async with async_session_maker(expire_on_commit=False) as session:
-        success_pg = await bulk_add_vacancies_to_db(db_vacancies, db=session)
-
+    success_pg = await collect_vacancies_to_db(vacancies)
     # Добавление вакансий в ElasticSearch
-    es_vacancies = map_hh_vacancies_to_elastic_vacancies(vacancies)
-    success_es, failed_es = await bulk_add_vacancies_to_es(es_vacancies)
+    success_es, failed_es = await collect_vacancies_to_es(vacancies)
 
     # Небольшая статистика по загруженным данным
     statistics = {
@@ -42,6 +30,22 @@ async def collect_vacancies():
         }
     }
     return statistics
+
+
+async def collect_vacancies_to_db(vacancies: list[hh_response_schemas.VacancyItem]):
+    """Добавление вакансий в базу"""
+    db_vacancies = hh_vacancy.map_hh_vacancies_to_domain_vacancies(vacancies)
+    async with async_session_maker(expire_on_commit=False) as session:
+        success_pg = await bulk_add_vacancies_to_db(db_vacancies, db=session)
+    return success_pg
+
+
+async def collect_vacancies_to_es(vacancies: list[hh_response_schemas.VacancyItem]):
+    """Добавление вакансий в ElasticSearch"""
+    db_vacancies = hh_vacancy.map_hh_vacancies_to_domain_vacancies(vacancies)
+    async with async_session_maker(expire_on_commit=False) as session:
+        success_pg = await bulk_add_vacancies_to_db(db_vacancies, db=session)
+    return success_pg
 
 
 async def bulk_add_vacancies_to_es(vacancies: list[dict]):

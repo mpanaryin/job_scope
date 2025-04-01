@@ -1,6 +1,11 @@
 services:
+  backend:
+    build:
+      context: ./backend
+    image: job_scope_backend:latest  # можно использовать как ссылку
+
   app:
-    build: ./backend
+    image: job_scope_backend:latest
     command: uvicorn src.main:app --host 0.0.0.0 --port 8000
     volumes:
       - ./backend:/app
@@ -14,6 +19,58 @@ services:
     depends_on:
       - db
       - elasticsearch
+
+  redis:
+    image: redis:latest
+    restart: always
+    volumes:
+      - redis_data:/data  # RDB + AOF
+      - ./infra/redis/redis.conf:/usr/local/etc/redis/redis.conf
+    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
+#    ports:
+#      - "6379:6379"
+
+  flower:
+    image: mher/flower:latest
+    container_name: flower
+    command: celery --broker=redis://redis:6379/0 flower
+    env_file:
+      - .env
+    environment:
+      - FLOWER_BASIC_AUTH=${FLOWER_USER}:${FLOWER_PASSWORD}
+    ports:
+      - "5555:5555"
+    depends_on:
+      - redis
+      - celery
+
+  celery:
+    image: job_scope_backend:latest
+    command: celery -A src.core.celery worker --loglevel=info
+    env_file:
+      - .env
+    volumes:
+      - ./backend:/app
+      - ./logs/fastapi:/app/logs
+      - ./media:/media
+      - ./static:/static
+    depends_on:
+      - redis
+      - app
+
+  celery-beat:
+    image: job_scope_backend:latest
+    env_file:
+      - .env
+    command: celery -A src.core.celery beat --loglevel=info
+    volumes:
+      - ./backend:/app
+      - ./logs/fastapi:/app/logs
+      - ./media:/media
+      - ./static:/static
+    depends_on:
+      - redis
+      - celery
 
   db:
     image: postgres:16
@@ -47,6 +104,8 @@ services:
     container_name: logstash
     env_file:
       - .env
+    environment:
+        - LS_JAVA_OPTS=${LS_JAVA_OPTS}
     volumes:
       - ./infra/elk/logstash/pipeline:/usr/share/logstash/pipeline
       - ./infra/elk/logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml
@@ -152,6 +211,7 @@ services:
       - nginx
 
 volumes:
+  redis_data:
   postgres_data:
   elastic_data:
     driver: local

@@ -31,7 +31,6 @@ async def lifespan(app: FastAPI):
     yield
 
 
-
 async def on_startup():
     AiohttpClient.get_aiohttp_client()
 

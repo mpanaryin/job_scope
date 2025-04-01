@@ -16,3 +16,6 @@ asyncpg==0.30.0
 psycopg==3.2.6
 python-json-logger==3.3.0
 prometheus-fastapi-instrumentator==7.1.0
+celery==5.5.0
+redis==5.2.1
+asgiref==3.8.1

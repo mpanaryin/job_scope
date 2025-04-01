@@ -37,4 +37,4 @@ RUN chmod +x /entrypoint.sh
 EXPOSE 8000
 
 # Используем entrypoint-скрипт для компиляции переводов и запуска приложения
-ENTRYPOINT ["/entrypoint.sh"]
+# ENTRYPOINT ["/entrypoint.sh"]
