@@ -4,7 +4,7 @@ import sys
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
-from src.vacancies.search.indices import delete_vacancy_index
+from src.vacancies.elastic.indices import delete_vacancy_index
 
 
 async def main():

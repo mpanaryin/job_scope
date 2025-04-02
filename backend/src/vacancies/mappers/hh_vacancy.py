@@ -1,10 +1,10 @@
 from pydantic import AnyUrl
 
-from src.integrations.headhunter.schemas.response import VacancyItem
+from src.integrations.headhunter.schemas.response import HHVacancyItem
 from src.vacancies.schemas import VacancyCreate, VacancySource
 
 
-def map_hh_vacancy_to_domain_vacancy(vacancy: VacancyItem) -> VacancyCreate:
+def map_hh_vacancy_to_domain_vacancy(vacancy: HHVacancyItem) -> VacancyCreate:
     """Маппинг VacancyItem (ответ от внешнего API) к VacancyCreate (схема для создания в БД)"""
     return VacancyCreate(
         source_name=VacancySource.HEADHUNTER,
@@ -30,12 +30,12 @@ def map_hh_vacancy_to_domain_vacancy(vacancy: VacancyItem) -> VacancyCreate:
     )
 
 
-def map_hh_vacancies_to_domain_vacancies(vacancies: list[VacancyItem]) -> list[VacancyCreate]:
+def map_hh_vacancies_to_domain_vacancies(vacancies: list[HHVacancyItem]) -> list[VacancyCreate]:
     """Маппинг списка VacancyItem к списку VacancyCreate"""
     return [map_hh_vacancy_to_domain_vacancy(vacancy) for vacancy in vacancies]
 
 
-def map_hh_vacancy_to_elastic_vacancy(vacancy: VacancyItem) -> dict:
+def map_hh_vacancy_to_elastic_vacancy(vacancy: HHVacancyItem) -> dict:
     """Маппинг VacancyItem к формату индекса ElasticSearch для вакансий"""
     return {
         "id": f"headhunter_{vacancy.id}",
@@ -94,7 +94,7 @@ def map_hh_vacancy_to_elastic_vacancy(vacancy: VacancyItem) -> dict:
     }
 
 
-def map_hh_vacancies_to_elastic_vacancies(vacancies: list[VacancyItem]):
+def map_hh_vacancies_to_elastic_vacancies(vacancies: list[HHVacancyItem]):
     """Маппинг списка VacancyItem к списку dict, который соответствует индексу в ElasticSearch"""
     es_vacancies = []
     for vacancy in vacancies:
@@ -108,7 +108,7 @@ def map_hh_vacancies_to_elastic_vacancies(vacancies: list[VacancyItem]):
     return es_vacancies
 
 
-def _get_description(vacancy: VacancyItem) -> str | None:
+def _get_description(vacancy: HHVacancyItem) -> str | None:
     """Вспомогательная функция для получения описания по вакансии"""
     description = None
     if vacancy.snippet:

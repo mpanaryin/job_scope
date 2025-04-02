@@ -5,7 +5,7 @@ from pydantic import Field
 from src.core.schemas import CustomModel
 
 
-class AccessUserTokenParams(CustomModel):
+class HHAccessUserTokenParams(CustomModel):
     """Параметры получения токена пользователя"""
     client_id: str
     client_secret: str
@@ -14,20 +14,20 @@ class AccessUserTokenParams(CustomModel):
     grant_type: Literal["authorization_code"] = "authorization_code"
 
 
-class RefreshTokenParams(CustomModel):
+class HHRefreshTokenParams(CustomModel):
     """Параметры для обновления пары access и refresh токенов"""
     refresh_token: str
     grant_type: Literal["refresh_token"] = "refresh_token"
 
 
-class AccessApplicationTokenParams(CustomModel):
+class HHAccessApplicationTokenParams(CustomModel):
     """Параметры получения нового токена приложения"""
     client_id: str
     client_secret: str
     grant_type: Literal["client_credentials"] = "client_credentials"
 
 
-class VacancySearchParams(CustomModel):
+class HHVacancySearchParams(CustomModel):
     """
     Параметры для запроса поиска вакансий
     /dictionaries - https://api.hh.ru/openapi/redoc#tag/Obshie-spravochniki/operation/get-dictionaries

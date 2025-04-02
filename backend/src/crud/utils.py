@@ -1,5 +1,4 @@
 import csv
-import enum
 import os
 import re
 import unicodedata
@@ -9,13 +8,8 @@ from typing import (
     Any,
     AsyncGenerator,
     Callable,
-    Dict,
     Generator,
-    List,
-    Optional,
-    Tuple,
     TypeVar,
-    Union,
 )
 
 from sqlalchemy import Column, inspect
@@ -23,7 +17,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import RelationshipProperty, sessionmaker, ColumnProperty
 
 T = TypeVar("T")
-MODEL_PROPERTY = Union[ColumnProperty, RelationshipProperty]
+MODEL_PROPERTY = ColumnProperty | RelationshipProperty
 
 
 _filename_ascii_strip_re = re.compile(r"[^A-Za-z0-9_.-]")
@@ -136,11 +130,11 @@ class Writer(ABC):
     """https://docs.python.org/3/library/csv.html#writer-objects"""
 
     @abstractmethod
-    def writerow(self, row: List[str]) -> None:
+    def writerow(self, row: list[str]) -> None:
         pass  # pragma: no cover
 
     @abstractmethod
-    def writerows(self, rows: List[List[str]]) -> None:
+    def writerows(self, rows: list[list[str]]) -> None:
         pass  # pragma: no cover
 
     @property
@@ -174,7 +168,7 @@ def stream_to_csv(
     return callback(writer)  # type: ignore
 
 
-def get_primary_keys(model: Any) -> Tuple[Column, ...]:
+def get_primary_keys(model: Any) -> tuple[Column, ...]:
     return tuple(inspect(model).mapper.primary_key)
 
 
@@ -191,7 +185,7 @@ def get_object_identifier(obj: Any) -> Any:
     return ";".join(str(v).replace("\\", "\\\\").replace(";", r"\;") for v in values)
 
 
-def _object_identifier_parts(id_string: str, model: type) -> Tuple[str, ...]:
+def _object_identifier_parts(id_string: str, model: type) -> tuple[str, ...]:
     pks = get_primary_keys(model)
     if len(pks) == 1:
         # Only one primary key so no special processing
@@ -255,7 +249,7 @@ def is_relationship(prop: MODEL_PROPERTY) -> bool:
     return isinstance(prop, RelationshipProperty)
 
 
-def parse_interval(value: str) -> Optional[timedelta]:
+def parse_interval(value: str) -> timedelta | None:
     match = (
         standard_duration_re.match(value)
         or iso8601_duration_re.match(value)
@@ -265,7 +259,7 @@ def parse_interval(value: str) -> Optional[timedelta]:
     if not match:
         return None
 
-    kw: Dict[str, Any] = match.groupdict()
+    kw: dict[str, Any] = match.groupdict()
     sign = -1 if kw.pop("sign", "+") == "-" else 1
     if kw.get("microseconds"):
         kw["microseconds"] = kw["microseconds"].ljust(6, "0")

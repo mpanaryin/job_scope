@@ -4,8 +4,8 @@ import os
 
 from src.core.config import settings
 from src.integrations.api_client import AuthType, APIClient
-from src.integrations.headhunter.schemas import request as request_schemas
-from src.integrations.headhunter.schemas import response as response_schemas
+from src.integrations.headhunter.schemas.request import HHAccessApplicationTokenParams, HHVacancySearchParams
+from src.integrations.headhunter.schemas.response import HHVacancyResponse, HHVacancyItem
 
 
 class HeadHunterService(APIClient):
@@ -23,7 +23,7 @@ class HeadHunterService(APIClient):
         Получить авторизационный токен, который в дальнейшем используем для запросов
         """
         headers = {"Content-Type": "application/x-www-form-urlencoded"}
-        request_data = request_schemas.AccessApplicationTokenParams(
+        request_data = HHAccessApplicationTokenParams(
             client_id=os.environ.get("HEADHUNTER_CLIENT_ID"),
             client_secret=os.environ.get("HEADHUNTER_CLIENT_SECRET"),
         )
@@ -45,8 +45,8 @@ class HeadHunterService(APIClient):
 
     async def get_vacancies(
         self,
-        search_params: request_schemas.VacancySearchParams
-    ) -> response_schemas.VacancyResponse:
+        search_params: HHVacancySearchParams
+    ) -> HHVacancyResponse:
         """
         Получить вакансии HeadHunter согласно search_params
         """
@@ -56,11 +56,11 @@ class HeadHunterService(APIClient):
             params=search_params.model_dump(mode="json", exclude_none=True, exclude_unset=True)
         )
         result = await response.json()
-        return response_schemas.VacancyResponse.model_validate(result)
+        return HHVacancyResponse.model_validate(result)
 
     async def get_all_vacancies(
-        self, search_params: request_schemas.VacancySearchParams
-    ) -> list[response_schemas.VacancyItem]:
+        self, search_params: HHVacancySearchParams
+    ) -> list[HHVacancyItem]:
         """
         Получить все вакансии по текущим параметрам.
 
@@ -74,7 +74,7 @@ class HeadHunterService(APIClient):
         # Вычисляем количество страниц
         max_pages = math.ceil(vacancy_response.found / 100)
         # Получаем все страницы отдельно
-        vacancies: list[response_schemas.VacancyItem] = []
+        vacancies: list[HHVacancyItem] = []
         search_params.per_page = 100
         for i in range(max_pages):
             search_params.page = i

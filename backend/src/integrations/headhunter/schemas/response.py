@@ -3,14 +3,14 @@ from pydantic import Field
 from src.core.schemas import CustomModel
 
 
-class ClusterGroup(CustomModel):
+class HHClusterGroup(CustomModel):
     id: str | None = None
     name: str | None = None
 
 
-class Argument(CustomModel):
+class HHArgument(CustomModel):
     argument: str | None = None
-    cluster_group: ClusterGroup | None = None
+    cluster_group: HHClusterGroup | None = None
     disable_url: str | None = None
     value: str | None = None
     value_description: str | None = None
@@ -18,7 +18,7 @@ class Argument(CustomModel):
     metro_type: str | None = None
 
 
-class MetroStation(CustomModel):
+class HHMetroStation(CustomModel):
     lat: float | None = None
     line_id: str | None = None
     line_name: str | None = None
@@ -27,29 +27,29 @@ class MetroStation(CustomModel):
     station_name: str | None = None
 
 
-class Address(CustomModel):
+class HHAddress(CustomModel):
     building: str | None = None
     city: str | None = None
     description: str | None = None
     lat: float | None = None
     lng: float | None = None
-    metro_stations: list[MetroStation] | None = None
+    metro_stations: list[HHMetroStation] | None = None
     street: str | None = None
 
 
-class Area(CustomModel):
+class HHArea(CustomModel):
     id: str | None = None
     name: str | None = None
     url: str | None = None
 
 
-class LogoUrl(CustomModel):
+class HHLogoUrl(CustomModel):
     original: str | None = None
     size_90: str | None = None
     size_240: str | None = None
 
 
-class Employer(CustomModel):
+class HHEmployer(CustomModel):
     accredited_it_employer: bool | None = None
     alternate_url: str | None = None
     id: str | None = None
@@ -59,73 +59,73 @@ class Employer(CustomModel):
     url: str | None = None
 
 
-class Employment(CustomModel):
+class HHEmployment(CustomModel):
     id: str | None = None
     name: str | None = None
 
 
-class Experience(CustomModel):
+class HHExperience(CustomModel):
     id: str | None = None
     name: str | None = None
 
 
-class Salary(CustomModel):
+class HHSalary(CustomModel):
     currency: str | None = None
     from_: int | None = Field(None, alias="from")
     gross: bool | None = None
     to: int | None = None
 
 
-class Schedule(CustomModel):
+class HHSchedule(CustomModel):
     id: str | None = None
     name: str | None = None
 
 
-class Snippet(CustomModel):
+class HHSnippet(CustomModel):
     requirement: str | None = None
     responsibility: str | None = None
 
 
-class Type(CustomModel):
+class HHType(CustomModel):
     id: str | None = None
     name: str | None = None
 
 
-class ProfessionalRole(CustomModel):
+class HHProfessionalRole(CustomModel):
     id: str | None = None
     name: str | None = None
 
 
-class VacancyItem(CustomModel):
+class HHVacancyItem(CustomModel):
     accept_incomplete_resumes: bool | None = None
-    address: Address | None = None
+    address: HHAddress | None = None
     alternate_url: str | None = None
     apply_alternate_url: str | None = None
     archived: bool = False
-    area: Area | None = None
-    employer: Employer | None = None
-    employment: Employment | None = None
-    experience: Experience | None = None
+    area: HHArea | None = None
+    employer: HHEmployer | None = None
+    employment: HHEmployment | None = None
+    experience: HHExperience | None = None
     has_test: bool | None = None
     id: str | None = None
     name: str | None = None
     published_at: str | None = None
     created_at: str | None = None
     response_letter_required: bool | None = None
-    salary: Salary | None = None
-    schedule: Schedule | None = None
-    snippet: Snippet | None = None
-    type: Type | None = None
+    salary: HHSalary | None = None
+    schedule: HHSchedule | None = None
+    snippet: HHSnippet | None = None
+    type: HHType | None = None
     url: str | None = None
-    professional_roles: list[ProfessionalRole] | None = None
+    professional_roles: list[HHProfessionalRole] | None = None
 
 
-class VacancyResponse(CustomModel):
-    arguments: list[Argument] | None = None
+class HHVacancyResponse(CustomModel):
+    arguments: list[HHArgument] | None = None
     clusters: dict | None = None
     fixes: dict | None = None
     found: int | None = None
-    items: list[VacancyItem] | None = None
+    items: list[HHVacancyItem] | None = None
     page: int | None = None
     pages: int | None = None
     per_page: int | None = None

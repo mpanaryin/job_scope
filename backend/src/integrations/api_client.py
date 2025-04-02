@@ -3,8 +3,7 @@ from enum import Enum
 from typing import Literal
 from urllib.parse import urljoin
 
-import aiohttp
-from aiohttp import BasicAuth, ClientResponse
+from aiohttp import ClientResponse
 
 from src.utils.aiohttp_client import AiohttpClient
 

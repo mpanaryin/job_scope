@@ -1,4 +1,4 @@
-from typing import no_type_check, Type, Any, ClassVar, Tuple, Union, Dict, List, Sequence, TypeVar, Optional
+from typing import no_type_check, Type, Any, ClassVar, Sequence, TypeVar
 
 from sqladmin.exceptions import InvalidModelError
 from sqlalchemy import inspect, Column, Engine, Select, select, and_, or_, ClauseElement
@@ -12,9 +12,9 @@ from src.crud.utils import get_primary_keys, slugify_class_name, prettify_class_
 from src.db.engine import async_session_maker
 
 MODEL_TYPE = TypeVar("ModelType", bound=Any)
-MODEL_PROPERTY = Union[ColumnProperty, RelationshipProperty]
-ENGINE_TYPE = Union[Engine, AsyncEngine]
-MODEL_ATTR = Union[str, InstrumentedAttribute]
+MODEL_PROPERTY = ColumnProperty | RelationshipProperty
+ENGINE_TYPE = Engine | AsyncEngine
+MODEL_ATTR = str | InstrumentedAttribute
 
 
 class CRUDBaseMeta(type):
@@ -52,8 +52,8 @@ class CRUDBaseMeta(type):
 
 class CRUDBase(metaclass=CRUDBaseMeta):
     # Internals
-    pk_columns: ClassVar[Tuple[Column]]
-    session_maker: ClassVar[Union[sessionmaker, "async_sessionmaker"]]
+    pk_columns: ClassVar[tuple[Column]]
+    session_maker: ClassVar[sessionmaker | async_sessionmaker]
     is_async: ClassVar[bool] = True
 
     name_plural: ClassVar[str] = ""
@@ -107,10 +107,10 @@ class CRUDBase(metaclass=CRUDBaseMeta):
 
     def _build_column_list(
         self,
-        defaults: List[str],
-        include: Optional[Union[str, Sequence[MODEL_ATTR]]] = None,
-        exclude: Optional[Union[str, Sequence[MODEL_ATTR]]] = None,
-    ) -> List[str]:
+        defaults: list[str],
+        include: str | Sequence[MODEL_ATTR] = None,
+        exclude: str | Sequence[MODEL_ATTR] = None,
+    ) -> list[str]:
         """This function generalizes constructing a list of columns
         for any sequence of inclusions or exclusions.
         """
@@ -124,7 +124,7 @@ class CRUDBase(metaclass=CRUDBaseMeta):
             return [prop for prop in self._prop_names if prop not in exclude]
         return defaults
 
-    def get_form_columns(self) -> List[str]:
+    def get_form_columns(self) -> list[str]:
         """Get list of properties to display in the form."""
         form_columns = getattr(self, "form_columns", None)
         form_excluded_columns = getattr(self, "form_excluded_columns", None)
@@ -140,7 +140,7 @@ class CRUDBase(metaclass=CRUDBaseMeta):
             result = await session.execute(stmt)
             return result.scalars().unique().all()
 
-    def _get_to_many_stmt(self, relation: MODEL_PROPERTY, values: List[Any]) -> Select:
+    def _get_to_many_stmt(self, relation: MODEL_PROPERTY, values: list[Any]) -> Select:
         target = relation.mapper.class_
 
         target_pks = get_primary_keys(target)
@@ -262,7 +262,7 @@ class CRUDBase(metaclass=CRUDBaseMeta):
         By default do nothing.
         """
 
-    async def create(self, data: Dict[str, Any], request: Request) -> Any:
+    async def create(self, data: dict[str, Any], request: Request) -> Any:
         """Create a new model object"""
         obj = self.model()
         async with self.session_maker(expire_on_commit=False) as session:
@@ -287,7 +287,7 @@ class CRUDBase(metaclass=CRUDBaseMeta):
             obj = result.scalars().first()
             return obj
 
-    async def get_multi(self, request: Request, offset: int = 0, limit: int = 100) -> List[Any]:
+    async def get_multi(self, request: Request, offset: int = 0, limit: int = 100) -> list[Any]:
         """Get model objects"""
         stmt = select(self.model)
 
@@ -299,7 +299,7 @@ class CRUDBase(metaclass=CRUDBaseMeta):
         return db_objs
 
     async def update(
-        self, pk: Any, data: Dict[str, Any], request: Request
+        self, pk: Any, data: dict[str, Any], request: Request
     ) -> Any:
         """Update the model object"""
         stmt = self._stmt_by_identifier(pk)
