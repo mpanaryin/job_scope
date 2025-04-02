@@ -6,8 +6,10 @@ USER root
 COPY filebeat.yml /usr/share/filebeat/filebeat.yml
 COPY entrypoint.sh /usr/local/bin/entrypoint.sh
 
-# Назначаем права
-RUN chmod go-w /usr/share/filebeat/filebeat.yml \
+# Создаём папку и назначаем права
+RUN mkdir -p /usr/share/filebeat/registry \
+    && chown -R filebeat:filebeat /usr/share/filebeat/registry \
+    && chmod go-w /usr/share/filebeat/filebeat.yml \
     && chmod +x /usr/local/bin/entrypoint.sh
 
 USER filebeat

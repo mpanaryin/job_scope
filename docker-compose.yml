@@ -6,7 +6,7 @@ services:
 
   app:
     image: job_scope_backend:latest
-    command: uvicorn src.main:app --host 0.0.0.0 --port 8000
+    command: uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload
     volumes:
       - ./backend:/app
       - ./logs/fastapi:/app/logs
@@ -150,6 +150,7 @@ services:
       - ./logs/fastapi:/app/logs:ro  # Папка с логами приложения
       - ./logs/nginx:/var/log/nginx:ro  # Логи nginx
       - ./logs/postgresql:/var/log/postgresql:ro
+      - filebeat_registry:/usr/share/filebeat/data
     restart: on-failure
 
   prometheus:
@@ -213,6 +214,7 @@ services:
 volumes:
   redis_data:
   postgres_data:
+  filebeat_registry:
   elastic_data:
     driver: local
   prometheus_data:

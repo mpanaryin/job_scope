@@ -33,6 +33,9 @@ filebeat.inputs:
     json.keys_under_root: true
     json.add_error_key: true
 
+# Нужно, чтобы не обрабатывать файлы повторно при перезапусках
+filebeat.registry.path: /usr/share/filebeat/data
+
 output.logstash:  # Отправляет обработанные логи в Logstash.
   hosts: ["logstash:5044"]
 
