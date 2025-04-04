@@ -1,17 +1,17 @@
-from typing import Any, Dict
+from typing import Any
 from urllib.request import Request
 
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
 from src.users import orm
-from src.auth.utils import check_password, hash_password
+from src.auth.utils import hash_password
 from src.crud.base import CRUDBase
 
 
 class UserService(CRUDBase, model=orm.User):
 
-    async def create(self, data: Dict[str, Any], request: Request | None = None) -> Any:
+    async def create(self, data: dict[str, Any], request: Request | None = None) -> orm.User:
         password = data.pop("password", "")
         obj = self.model(**data)
         async with self.session_maker(expire_on_commit=False) as session:
@@ -22,7 +22,7 @@ class UserService(CRUDBase, model=orm.User):
                 await self.after_model_change(data, obj, True, request)
         return obj
 
-    async def get_by_email(self, email: str) -> Any:
+    async def get_by_email(self, email: str) -> orm.User:
         """Get the model object"""
         stmt = select(self.model).where(self.model.email == email).limit(1)
 

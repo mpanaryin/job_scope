@@ -39,7 +39,7 @@ class AuthenticationMiddleware(BaseHTTPMiddleware):
         if not token_data:
             request.state.user = AnonymousUser()
         else:
-            user = await UserService().get(token_data.user_id)
+            user = await UserService().get_by_pk(token_data.user_id)
             request.state.user = user or AnonymousUser()
         # Продолжение обработки запроса
         response = await call_next(request)

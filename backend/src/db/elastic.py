@@ -78,5 +78,5 @@ async def delete_vacancy(vacancy_id: str):
 
 async def delete_index():
     """Удаляет индекс 'vacancies'"""
-    result = await es_client.indices.delete(index="vacancies", ignore=[400, 404])
+    result = await es_client.indices.delete_by_pk(index="vacancies", ignore=[400, 404])
     return result

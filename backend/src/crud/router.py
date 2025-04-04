@@ -45,11 +45,11 @@ class CRUDRouter:
                 return db_obj
         return _create
 
-    def get(self) -> Callable:
+    def get_by_pk(self) -> Callable:
         @self.router.get("/{pk}", response_model=self.read_schema)
         @self.access_control
         async def _get(request: Request, pk: Any):
-            db_obj = await self.crud.get(pk=pk)
+            db_obj = await self.crud.get_by_pk(pk=pk)
             if not db_obj:
                 raise NotFound()
             return db_obj
@@ -63,13 +63,13 @@ class CRUDRouter:
             return db_objs
         return _get_multi
 
-    def update(self) -> Callable:
+    def update_by_pk(self) -> Callable:
         if self.update_as_form:
             @self.router.put("/{pk}", response_model=self.read_schema)
             @self.access_control
             async def _update(request: Request, pk: Any, obj: self.update_schema = Depends(self.update_schema.as_form)):
                 try:
-                    db_obj = await self.crud.update(
+                    db_obj = await self.crud.update_by_pk(
                         pk=pk,
                         data=obj.model_dump(exclude_unset=True),
                         request=request
@@ -82,7 +82,7 @@ class CRUDRouter:
             @self.access_control
             async def _update(request: Request, pk: Any, obj: self.update_schema):
                 try:
-                    db_obj = await self.crud.update(
+                    db_obj = await self.crud.update_by_pk(
                         pk=pk,
                         data=obj.model_dump(exclude_unset=True, exclude_defaults=True),
                         request=request
@@ -92,11 +92,11 @@ class CRUDRouter:
                 return db_obj
         return _update
 
-    def delete(self) -> Callable:
+    def delete_by_pk(self) -> Callable:
         @self.router.delete("/{pk}", response_model=self.read_schema)
         @self.access_control
         async def _delete(request: Request, pk: Any):
-            db_obj = await self.crud.delete(pk=pk, request=request)
+            db_obj = await self.crud.delete_by_pk(pk=pk, request=request)
             return db_obj
         return _delete
 
@@ -106,11 +106,11 @@ class CRUDRouter:
             self.create()
         if 'GET' in self.methods:
             self.get_multi()
-            self.get()
+            self.get_by_pk()
         if 'PUT' in self.methods:
-            self.update()
+            self.update_by_pk()
         if 'DELETE' in self.methods:
-            self.delete()
+            self.delete_by_pk()
 
     def get_router(self):
         """Get the router for include_router in FastAPI"""

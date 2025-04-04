@@ -6,8 +6,7 @@ from src.core.config import settings
 from src.db.base import Base
 # Импорты моделей, чтобы SQLAlchemy "увидел" их
 from src.users.orm import User
-from src.vacancies.orm import Vacancy
-
+from src.vacancies.infrastructure.db.orm import Vacancy
 
 config = context.config
 fileConfig(config.config_file_name)

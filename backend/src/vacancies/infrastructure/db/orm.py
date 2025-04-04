@@ -9,7 +9,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 
 from src.db.base import Base
 from src.utils.datetimes import get_timezone_now
-from src.vacancies.schemas import VacancySource
+from src.vacancies.domain.schemas import VacancySource
 
 
 class Vacancy(Base):

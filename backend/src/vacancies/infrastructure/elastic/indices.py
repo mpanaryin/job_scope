@@ -1,7 +1,7 @@
 from elasticsearch import AsyncElasticsearch
 
 from src.core.config import settings
-from src.vacancies.elastic.mappings import VACANCY_MAPPING
+from src.vacancies.infrastructure.elastic.mappings import VACANCY_MAPPING
 
 
 async def create_vacancy_index():
@@ -15,5 +15,5 @@ async def create_vacancy_index():
 async def delete_vacancy_index():
     """Удаляет индекс 'vacancies'"""
     async with AsyncElasticsearch(settings.ELASTICSEARCH_HOSTS) as es:
-        result = await es.indices.delete(index="vacancies")
+        result = await es.indices.delete_by_pk(index="vacancies")
         return result

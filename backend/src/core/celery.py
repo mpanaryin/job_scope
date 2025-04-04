@@ -17,12 +17,12 @@ def config_loggers(*args, **kwargs):
     dictConfig(LOGGING_CONFIG)
 
 
-celery_app.autodiscover_tasks(["src.vacancies.tasks.vacancy_collector"])
+celery_app.autodiscover_tasks(["src.vacancies.presentation.tasks"])
 
 # Настройки Celery Beat (задачи по расписанию)
-celery_app.conf.beat_schedule = {
-    "fetch_vacancies_every_10_min": {
-        "task": "src.vacancies.tasks.vacancy_collector.collect_vacancies_task",
-        "schedule": 60.0  # каждые 1 мин
-    }
-}
+# celery_app.conf.beat_schedule = {
+#     "fetch_vacancies_every_10_min": {
+#         "task": "src.vacancies.presentation.tasks.collect_vacancies_task",
+#         "schedule": 60.0  # каждые 1 мин
+#     }
+# }

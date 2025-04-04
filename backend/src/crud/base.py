@@ -198,8 +198,8 @@ class CRUDBase(metaclass=CRUDBaseMeta):
         self, session: AsyncSession, obj: Any, data: dict
     ) -> Any:
         for key, value in data.items():
-            column = self._mapper.columns.get(key)
-            relation = self._mapper.relationships.get(key)
+            column = self._mapper.columns.get_by_pk(key)
+            relation = self._mapper.relationships.get_by_pk(key)
 
             # Set falsy values to None, if column is Nullable
             if not value:
@@ -272,10 +272,10 @@ class CRUDBase(metaclass=CRUDBaseMeta):
             await session.commit()
             await session.refresh(obj)
             # await self.after_model_change(data, obj, True, request)
-            obj = await self.get(pk=obj.id)
+            obj = await self.get_by_pk(pk=obj.id)
         return obj
 
-    async def get(self, pk: Any) -> Any:
+    async def get_by_pk(self, pk: Any) -> Any:
         """Get the model object"""
         stmt = self._stmt_by_identifier(pk)
 
@@ -298,7 +298,7 @@ class CRUDBase(metaclass=CRUDBaseMeta):
         db_objs = await self._run_query(stmt)
         return db_objs
 
-    async def update(
+    async def update_by_pk(
         self, pk: Any, data: dict[str, Any], request: Request
     ) -> Any:
         """Update the model object"""
@@ -314,10 +314,10 @@ class CRUDBase(metaclass=CRUDBaseMeta):
             obj = await self._set_attributes_async(session, obj, data)
             await session.commit()
             # await self.after_model_change(data, obj, False, request)
-            obj = await self.get(pk=obj.id)
+            obj = await self.get_by_pk(pk=obj.id)
             return obj
 
-    async def delete(self, pk: Any, request: Request) -> Any:
+    async def delete_by_pk(self, pk: Any, request: Request) -> Any:
         """Delete the model object"""
         async with self.session_maker() as session:
             result = await session.execute(self._get_delete_stmt(pk))

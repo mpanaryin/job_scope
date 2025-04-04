@@ -1,8 +1,9 @@
 import datetime
+from typing import Any
 from zoneinfo import ZoneInfo
 
 from fastapi.encoders import jsonable_encoder
-from pydantic import BaseModel, model_validator
+from pydantic import BaseModel, model_validator, Field
 
 
 class CustomModel(BaseModel):
@@ -31,3 +32,32 @@ class CustomModel(BaseModel):
         """Возвращает словарь, содержащий только сериализуемые поля."""
         default_dict = self.model_dump()
         return jsonable_encoder(default_dict)
+
+
+class BulkResult(BaseModel):
+    """
+    Результат bulk-операции
+    Attributes:
+        success (int): Количество успешно обработанных записей
+        failed (int | list[Any]): Количество неудачных записей или список с деталями
+        skipped (int | None): Количество пропущенных записей, если применимо
+        total (int | None): Общее количество обработанных записей
+        meta (dict[str, Any] | None): Дополнительная информация по выполненной операции
+    """
+    success: int = Field(..., description="Количество успешно обработанных записей")
+    failed: int | list[Any] = Field(
+        default=0,
+        description="Количество неудачных записей или список с деталями",
+    )
+    skipped: int | None = Field(
+        default=None,
+        description="Количество пропущенных записей, если применимо"
+    )
+    total: int | None = Field(
+        default=None,
+        description="Общее количество обработанных записей"
+    )
+    meta: dict[str, Any] | None = Field(
+        default=None,
+        description="Дополнительная информация по выполненной операции"
+    )

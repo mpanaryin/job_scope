@@ -1,28 +1,14 @@
 import datetime
 import uuid
-from enum import Enum
 from typing import Literal
 
 from pydantic import AnyUrl, field_serializer, Field
 
 from src.core.schemas import CustomModel
+from src.vacancies.domain.entities import VacancySource
 
 
-class VacancySource(str, Enum):
-    HEADHUNTER = 'headhunter'
-    RABOTA = 'rabota'
-    SUPERJOB = 'superjob'
-
-    @property
-    def label(self):
-        return {
-            self.HEADHUNTER: "HeadHunter",
-            self.RABOTA: "Rabota",
-            self.SUPERJOB: "SuperJob"
-        }[self]
-
-
-class Vacancy(CustomModel):
+class VacancyRead(CustomModel):
     """Данные по вакансии"""
     id: uuid.UUID
     # Источник вакансии
@@ -163,3 +149,4 @@ class VacancySearchQuery(CustomModel):
     sort_order: Literal["asc", "desc"] = "desc"
     page: int = 0
     size: int = 10
+

@@ -4,7 +4,7 @@ import sys
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
-from src.vacancies.elastic.indices import create_vacancy_index
+from src.vacancies.infrastructure.elastic.indices import create_vacancy_index
 
 
 async def main():

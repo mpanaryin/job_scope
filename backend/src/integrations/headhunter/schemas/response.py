@@ -96,7 +96,7 @@ class HHProfessionalRole(CustomModel):
     name: str | None = None
 
 
-class HHVacancyItem(CustomModel):
+class HHVacancy(CustomModel):
     accept_incomplete_resumes: bool | None = None
     address: HHAddress | None = None
     alternate_url: str | None = None
@@ -107,7 +107,7 @@ class HHVacancyItem(CustomModel):
     employment: HHEmployment | None = None
     experience: HHExperience | None = None
     has_test: bool | None = None
-    id: str | None = None
+    id: str
     name: str | None = None
     published_at: str | None = None
     created_at: str | None = None
@@ -125,7 +125,7 @@ class HHVacancyResponse(CustomModel):
     clusters: dict | None = None
     fixes: dict | None = None
     found: int | None = None
-    items: list[HHVacancyItem] | None = None
+    items: list[HHVacancy] | None = None
     page: int | None = None
     pages: int | None = None
     per_page: int | None = None

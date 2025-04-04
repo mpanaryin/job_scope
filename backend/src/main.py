@@ -18,8 +18,8 @@ from src.users.admin import UserAdmin
 from src.db.engine import engine
 from src.db.utils import create_db_and_tables
 from src.utils.aiohttp_client import AiohttpClient
-from src.vacancies.admin import VacancyAdmin
-from src.vacancies.api import router as vacancies_router, VacancyCRUDRouter
+from src.vacancies.presentation.admin import VacancyAdmin
+from src.vacancies.presentation.api import router as vacancies_router, VacancyCRUDRouter
 
 
 logger = logging.getLogger(__name__)
