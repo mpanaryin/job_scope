@@ -2,15 +2,15 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
 from starlette.responses import JSONResponse
 
-from src.auth.exceptions import RefreshTokenNotValid
-from src.auth.jwt import JWTAuth
-from src.auth.schemas import AnonymousUser
-from src.users.services import UserService
+from src.auth.domain.entities import AnonymousUser
+from src.auth.domain.exceptions import RefreshTokenNotValid
+from src.auth.presentation.dependencies import get_jwt_auth
+from src.users.infrastructure.db.crud import UserService
 
 
 class JWTRefreshMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
-        pre_auth = JWTAuth(request=request)
+        pre_auth = await get_jwt_auth(request=request)
         access_data = pre_auth.read_access_token()
         if access_data is None:
             try:
@@ -21,7 +21,7 @@ class JWTRefreshMiddleware(BaseHTTPMiddleware):
         response = await call_next(request)
         # Нужно проверить, остался ли refresh токен,
         # иначе будет баг с продлением access
-        post_auth = JWTAuth(request=request, response=response)
+        post_auth = await get_jwt_auth(request=request, response=response)
         if post_auth.read_refresh_token():
             pre_auth.update_response(response)
         # Токен валидный, продолжаем
@@ -34,7 +34,7 @@ class AuthenticationMiddleware(BaseHTTPMiddleware):
 
     async def dispatch(self, request: Request, call_next):
         # Добавление пользователя в запрос
-        jwt_auth = JWTAuth(request=request)
+        jwt_auth = await get_jwt_auth(request=request)
         token_data = jwt_auth.read_access_token()
         if not token_data:
             request.state.user = AnonymousUser()

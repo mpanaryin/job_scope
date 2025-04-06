@@ -8,7 +8,7 @@ async def create_vacancy_index():
     """Создаёт индекс 'vacancies'"""
     async with AsyncElasticsearch(settings.ELASTICSEARCH_HOSTS) as es:
         # ignore=400 -> не создаст, если индекс уже есть
-        result = await es.indices.create(index="vacancies", body=VACANCY_MAPPING, ignore=400)
+        result = await es.indices.add(index="vacancies", body=VACANCY_MAPPING, ignore=400)
         return result
 
 

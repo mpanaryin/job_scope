@@ -2,17 +2,16 @@ from elasticsearch import helpers
 
 from src.core.schemas import BulkResult
 from src.db.elastic import es_client
-from src.vacancies.application.mappers.mappers import DomainToElasticMapper
-from src.vacancies.domain.entities import Vacancy
+from src.vacancies.application.mappers.vacancies import VacancyDomainToElasticMapper
+from src.vacancies.domain.entities import Vacancy, VacancySearchQuery
 from src.vacancies.domain.interfaces import IVacancySearchRepository
-from src.vacancies.domain.schemas import VacancySearchQuery
 
 
 class ESVacancySearchRepository(IVacancySearchRepository):
     """ElasticSearch Vacancy Search Repository"""
 
-    async def bulk_create(self, vacancies: list[Vacancy]) -> BulkResult:
-        vacancies = DomainToElasticMapper().map(vacancies)
+    async def bulk_add(self, vacancies: list[Vacancy]) -> BulkResult:
+        vacancies = VacancyDomainToElasticMapper().map(vacancies)
         success, failed = await helpers.async_bulk(es_client, vacancies)
         return BulkResult(success=success, failed=failed, total=len(vacancies))
 

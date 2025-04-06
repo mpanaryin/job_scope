@@ -1,9 +1,9 @@
-from src.users.services import UserService
+from src.users.infrastructure.db.crud import UserService
 from src.core.config import settings
 from src.db.base import Base
 from src.db.engine import engine
 # Тут импорты всех моделей, которые должны создаваться при create_db_and_tables
-from src.users.orm import User
+from src.users.infrastructure.db.orm import UserDB
 from src.vacancies.infrastructure.db.orm import Vacancy
 
 

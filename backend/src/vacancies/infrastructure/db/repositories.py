@@ -4,7 +4,7 @@ from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.core.schemas import BulkResult
-from src.vacancies.application.mappers.mappers import DomainToDBMapper
+from src.vacancies.application.mappers.vacancies import VacancyDomainToDTOMapper
 from src.vacancies.domain.entities import Vacancy
 from src.vacancies.domain.interfaces import IVacancyRepository
 from src.vacancies.infrastructure.db import orm
@@ -18,13 +18,13 @@ class PGVacancyRepository(IVacancyRepository):
         super().__init__()
         self.session = session
 
-    async def bulk_create_or_update(self, vacancies: list[Vacancy]) -> BulkResult:
+    async def bulk_add_or_update(self, vacancies: list[Vacancy]) -> BulkResult:
         """
         Добавляет или обновляет вакансии массово
         :param vacancies: Список вакансий для создания
         :return int: Количество обработанных вакансий
         """
-        vacancies = DomainToDBMapper().map(vacancies)
+        vacancies = VacancyDomainToDTOMapper().map(vacancies)
         stmt = insert(orm.Vacancy).values([vacancy.model_dump() for vacancy in vacancies])
         stmt = stmt.on_conflict_do_update(
             index_elements=["source_name", "source_id"],

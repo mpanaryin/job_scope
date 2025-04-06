@@ -1,4 +1,6 @@
+import datetime
 from enum import Enum
+from typing import Literal
 
 from pydantic import Field
 
@@ -111,3 +113,20 @@ class Vacancy(CustomModel):
         responsibility = self.responsibility or ''
         description = f"{requirement}\n\n{responsibility}".strip()
         return description
+
+
+class VacancySearchQuery(CustomModel):
+    query: str | None = Field(None, description="Поисковый запрос по названию вакансии")
+    area: str | None = Field(None, description="Регион, например 'Москва'")
+    employer: str | None = Field(None, description="Название работодателя")
+    experience: str | None = Field(None, description="Опыт работы, например 'От 1 года до 3 лет'")
+    employment: str | None = Field(None, description="Тип занятости")
+    schedule: str | None = Field(None, description="График работы")
+    published_from: datetime.date | None = None
+    published_to: datetime.date | None = None
+    has_test: bool | None = None
+    is_archived: bool | None = None
+    sort_by: Literal["published_at", "salary_from", "salary_to"] | None = None
+    sort_order: Literal["asc", "desc"] = "desc"
+    page: int = 0
+    size: int = 10

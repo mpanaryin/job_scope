@@ -1,11 +1,11 @@
 from typing import Callable, TypeVar, Any
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 from sqlalchemy.exc import IntegrityError
 from starlette.requests import Request
 
-from src.auth.permissions import access_control
+from src.auth.presentation.permissions import access_control
 from src.core.exceptions import AlreadyExists, NotFound
 from src.crud.base import CRUDBase
 

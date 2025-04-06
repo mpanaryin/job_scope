@@ -20,7 +20,7 @@ async def create_index():
             }
         }
     }
-    result = await es_client.indices.create(index="vacancies", body=index_body, ignore=400)  # ignore=400 -> не создаст, если индекс уже есть
+    result = await es_client.indices.add(index="vacancies", body=index_body, ignore=400)  # ignore=400 -> не создаст, если индекс уже есть
     return result
 
 

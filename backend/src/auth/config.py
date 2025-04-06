@@ -13,9 +13,9 @@ class AuthConfig(BaseSettings):
     ACCESS_TOKEN_EXPIRE_SECONDS: int = 60 * 15
     REFRESH_TOKEN_EXPIRE_SECONDS: int = 60 * 60 * 24 * 365
     SECURE_COOKIES: bool = True
-    JWT_METHOD: Literal["cookies", "headers", "both"] = "cookies"
+    JWT_METHOD: Literal["cookies", "headers", "both"] = "both"
+    JWT_HEADER_TYPE: str = "Bearer"
     JWT_ACCESS_HEADER_NAME: str = "Authorization"
-    JWT_ACCESS_HEADER_TYPE: str = "Bearer"
     JWT_REFRESH_HEADER_NAME: str = "X-Refresh-Token"
 
 

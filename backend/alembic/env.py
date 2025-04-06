@@ -5,7 +5,7 @@ from alembic import context
 from src.core.config import settings
 from src.db.base import Base
 # Импорты моделей, чтобы SQLAlchemy "увидел" их
-from src.users.orm import User
+from src.users.infrastructure.db.orm import UserDB
 from src.vacancies.infrastructure.db.orm import Vacancy
 
 config = context.config
