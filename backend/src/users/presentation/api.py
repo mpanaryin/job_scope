@@ -18,17 +18,17 @@ async def register(user_data: UserCreateDTO):
     return await register_user(user_data, uow=PGUserUnitOfWork())
 
 
-@user_api_router.get("", response_model=UserReadDTO)
+@user_api_router.get("/{user_id}", response_model=UserReadDTO)
 async def get_profile(user_id: int):
     return await get_user_profile(user_id, uow=PGUserUnitOfWork())
 
 
-@user_api_router.patch("", response_model=UserReadDTO)
+@user_api_router.patch("/{user_id}", response_model=UserReadDTO)
 async def update(user_id: int, user_data: UserUpdateDTO):
     return await update_user(user_id, user_data, uow=PGUserUnitOfWork())
 
 
-@user_api_router.delete("")
+@user_api_router.delete("/{user_id}")
 async def delete(user_id: int):
     return await delete_user(user_id, uow=PGUserUnitOfWork())
 

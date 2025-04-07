@@ -34,6 +34,7 @@ class Settings(BaseSettings):
     DATABASE_URI: AnyUrl | None = None
     ALEMBIC_DATABASE_URI: AnyUrl | None = None
 
+    REDIS_URL: str = os.environ.get("REDIS_URL", "redis://localhost:6379/0")
     ELASTICSEARCH_HOSTS: str = os.environ.get("ELASTICSEARCH_HOSTS")
 
     @staticmethod

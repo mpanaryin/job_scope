@@ -19,6 +19,7 @@ services:
     depends_on:
       - db
       - elasticsearch
+      - redis
 
   redis:
     image: redis:latest

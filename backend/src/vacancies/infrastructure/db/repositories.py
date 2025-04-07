@@ -1,4 +1,5 @@
 import logging
+from typing import Any, Sequence
 
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -50,7 +51,12 @@ class PGVacancyRepository(IVacancyRepository):
         ).returning(orm.Vacancy.id, orm.Vacancy.updated_at, orm.Vacancy.created_at)
         result = await self.session.execute(stmt)
         rows = result.fetchall()
-        logging.info(rows)
+        return self._build_bulk_result(rows, total=len(vacancies))
+
+    def _build_bulk_result(self, rows: Sequence[Any], total: int) -> BulkResult:
+        """
+        Подсчёт количества созданных и обновлённых записей
+        """
         created, updated = 0, 0
         for row in rows:
             if row.updated_at != row.created_at:
@@ -58,6 +64,6 @@ class PGVacancyRepository(IVacancyRepository):
             else:
                 created += 1
         return BulkResult(
-            success=created+updated,
-            failed=len(vacancies) - (created + updated),
+            success=created + updated,
+            failed=total - (created + updated),
         )

@@ -171,3 +171,6 @@ cython_debug/
 # Logs
 *.log*
 /logs/postgresql/*.json
+
+# Secrets
+*.pem

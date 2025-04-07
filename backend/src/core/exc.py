@@ -41,6 +41,3 @@ class BadRequest(AppException):
 class NotAuthenticated(AppException):
     status_code = status.HTTP_401_UNAUTHORIZED
     detail = "User not authenticated"
-
-    def __init__(self) -> None:
-        super().__init__(headers={"WWW-Authenticate": "Bearer"})

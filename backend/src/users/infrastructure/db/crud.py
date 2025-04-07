@@ -5,7 +5,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
 from src.users.infrastructure.db import orm
-from src.auth.infrastructure.services.password_utils import hash_password
+from src.auth.infrastructure.services.password import hash_password
 from src.crud.base import CRUDBase
 
 

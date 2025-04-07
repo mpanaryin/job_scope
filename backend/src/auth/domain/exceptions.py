@@ -1,4 +1,4 @@
-from src.core.exc import BadRequest, NotAuthenticated, PermissionDenied
+from src.core.exc import BadRequest, NotAuthenticated
 
 
 class ErrorCode:
@@ -12,28 +12,28 @@ class ErrorCode:
 
 
 class AuthRequired(NotAuthenticated):
-    DETAIL = ErrorCode.AUTHENTICATION_REQUIRED
+    detail = ErrorCode.AUTHENTICATION_REQUIRED
 
 
 class AuthorizationFailed(NotAuthenticated):
-    DETAIL = ErrorCode.AUTHORIZATION_FAILED
+    detail = ErrorCode.AUTHORIZATION_FAILED
 
 
 class InvalidToken(NotAuthenticated):
-    DETAIL = ErrorCode.INVALID_TOKEN
+    detail = ErrorCode.INVALID_TOKEN
 
 
 class InvalidCredentials(NotAuthenticated):
-    DETAIL = ErrorCode.INVALID_CREDENTIALS
+    detail = ErrorCode.INVALID_CREDENTIALS
 
 
 class EmailTaken(BadRequest):
-    DETAIL = ErrorCode.EMAIL_TAKEN
+    detail = ErrorCode.EMAIL_TAKEN
 
 
 class RefreshTokenRequired(BadRequest):
-    DETAIL = ErrorCode.REFRESH_TOKEN_REQUIRED
+    detail = ErrorCode.REFRESH_TOKEN_REQUIRED
 
 
 class RefreshTokenNotValid(NotAuthenticated):
-    DETAIL = ErrorCode.REFRESH_TOKEN_NOT_VALID
+    detail = ErrorCode.REFRESH_TOKEN_NOT_VALID

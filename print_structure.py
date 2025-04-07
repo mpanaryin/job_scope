@@ -11,7 +11,10 @@ FULLY_EXCLUDED = {
     '.pytest_cache',
     '.vscode',
     '.DS_Store',
-    '.env'
+    '.env',
+    'celerybeat-schedule',
+    'celerybeat-schedule-shm',
+    'celerybeat-schedule-wal',
 }
 
 # Отображать только на первом уровне

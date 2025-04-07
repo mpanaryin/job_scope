@@ -2,19 +2,19 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
 from starlette.responses import JSONResponse
 
-from src.auth.domain.entities import AnonymousUser
+from src.auth.domain.entities import AnonymousUser, TokenType
 from src.auth.domain.exceptions import RefreshTokenNotValid
 from src.auth.presentation.dependencies import get_jwt_auth
-from src.users.infrastructure.db.crud import UserService
+from src.users.infrastructure.db.unit_of_work import PGUserUnitOfWork
 
 
 class JWTRefreshMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
         pre_auth = await get_jwt_auth(request=request)
-        access_data = pre_auth.read_access_token()
+        access_data = await pre_auth.read_token(TokenType.ACCESS)
         if access_data is None:
             try:
-                pre_auth.refresh_access_token()
+                await pre_auth.refresh_access_token()
             except RefreshTokenNotValid:
                 # Не смогли обновить токен, продолжаем обычный запрос
                 ...
@@ -22,8 +22,9 @@ class JWTRefreshMiddleware(BaseHTTPMiddleware):
         # Нужно проверить, остался ли refresh токен,
         # иначе будет баг с продлением access
         post_auth = await get_jwt_auth(request=request, response=response)
-        if post_auth.read_refresh_token():
-            pre_auth.update_response(response)
+        refresh_data = await post_auth.read_token(TokenType.REFRESH)
+        if refresh_data:
+            await pre_auth.update_response(response)
         # Токен валидный, продолжаем
         return response
 
@@ -35,12 +36,13 @@ class AuthenticationMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
         # Добавление пользователя в запрос
         jwt_auth = await get_jwt_auth(request=request)
-        token_data = jwt_auth.read_access_token()
+        token_data = await jwt_auth.read_token(TokenType.ACCESS)
         if not token_data:
             request.state.user = AnonymousUser()
         else:
-            user = await UserService().get_by_pk(token_data.user_id)
-            request.state.user = user or AnonymousUser()
+            async with PGUserUnitOfWork() as uow:
+                user = await uow.users.get_by_pk(token_data.user_id)
+                request.state.user = user or AnonymousUser()
         # Продолжение обработки запроса
         response = await call_next(request)
         return response

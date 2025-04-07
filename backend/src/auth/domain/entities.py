@@ -1,3 +1,4 @@
+import datetime
 from enum import Enum
 
 from fastapi import Form
@@ -14,7 +15,10 @@ class TokenType(str, Enum):
 class TokenData(CustomModel):
     user_id: int
     is_superuser: bool = False
-    exp: int
+    exp: datetime.datetime
+    jti: str | None = None
+    aud: str | None = None
+    iss: str | None = None
 
 
 class AuthUser(CustomModel):

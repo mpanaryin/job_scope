@@ -1,4 +1,4 @@
-from src.auth.infrastructure.services.password_utils import hash_password
+from src.auth.infrastructure.services.password import hash_password
 from src.users.domain.entities import UserCreate, User
 from src.users.domain.interfaces import IUserUnitOfWork
 from src.users.domain.dtos import UserCreateDTO

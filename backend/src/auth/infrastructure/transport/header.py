@@ -38,4 +38,4 @@ class HeaderTransport(IAuthTransport):
             try:
                 return header.split(" ")[1]
             except IndexError:
-                ...
+                return header

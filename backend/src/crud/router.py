@@ -65,7 +65,7 @@ class CRUDRouter:
 
     def update_by_pk(self) -> Callable:
         if self.update_as_form:
-            @self.router.put("/{pk}", response_model=self.read_schema)
+            @self.router.patch("/{pk}", response_model=self.read_schema)
             @self.access_control
             async def _update(request: Request, pk: Any, obj: self.update_schema = Depends(self.update_schema.as_form)):
                 try:
@@ -78,13 +78,13 @@ class CRUDRouter:
                     raise NotFound()
                 return db_obj
         else:
-            @self.router.put("/{pk}", response_model=self.read_schema)
+            @self.router.patch("/{pk}", response_model=self.read_schema)
             @self.access_control
             async def _update(request: Request, pk: Any, obj: self.update_schema):
                 try:
                     db_obj = await self.crud.update_by_pk(
                         pk=pk,
-                        data=obj.model_dump(exclude_unset=True, exclude_defaults=True),
+                        data=obj.model_dump(exclude_unset=True),
                         request=request
                     )
                 except AttributeError:

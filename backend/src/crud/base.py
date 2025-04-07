@@ -198,8 +198,8 @@ class CRUDBase(metaclass=CRUDBaseMeta):
         self, session: AsyncSession, obj: Any, data: dict
     ) -> Any:
         for key, value in data.items():
-            column = self._mapper.columns.get_by_pk(key)
-            relation = self._mapper.relationships.get_by_pk(key)
+            column = self._mapper.columns.get(key)
+            relation = self._mapper.relationships.get(key)
 
             # Set falsy values to None, if column is Nullable
             if not value:
@@ -272,7 +272,7 @@ class CRUDBase(metaclass=CRUDBaseMeta):
             await session.commit()
             await session.refresh(obj)
             # await self.after_model_change(data, obj, True, request)
-            obj = await self.get_by_pk(pk=obj.id)
+            # obj = await self.get_by_pk(pk=obj.id)
         return obj
 
     async def get_by_pk(self, pk: Any) -> Any:
@@ -314,7 +314,7 @@ class CRUDBase(metaclass=CRUDBaseMeta):
             obj = await self._set_attributes_async(session, obj, data)
             await session.commit()
             # await self.after_model_change(data, obj, False, request)
-            obj = await self.get_by_pk(pk=obj.id)
+            # obj = await self.get_by_pk(pk=obj.id)
             return obj
 
     async def delete_by_pk(self, pk: Any, request: Request) -> Any:
