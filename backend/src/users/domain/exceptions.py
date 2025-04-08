@@ -1,5 +1,5 @@
 from fastapi import status
-from src.core.exc import NotFound, AlreadyExists
+from src.core.domain.exceptions import NotFound, AlreadyExists
 
 
 class UserAlreadyExists(AlreadyExists):

@@ -7,13 +7,16 @@ from pydantic import BaseModel, model_validator, Field
 
 
 class CustomModel(BaseModel):
+    """Custom Base pydantic model"""
+
     @model_validator(mode="after")
     def normalize_datetimes(self) -> "CustomModel":
         """
-        Общая обработка datetime:
-        - если есть таймзона, привести к Europe/Moscow
-        - если нет — установить таймзону Moscow
-        - убрать микросекунды
+        Normalize all datetime fields in the model.
+
+        - If the datetime has a timezone, it will be converted to Europe/Moscow.
+        - If no timezone is present, Europe/Moscow will be assigned.
+        - Microseconds will be removed.
         """
         tz_moscow = ZoneInfo("Europe/Moscow")
 
@@ -29,20 +32,25 @@ class CustomModel(BaseModel):
         return self
 
     def serializable_dict(self, **kwargs):
-        """Возвращает словарь, содержащий только сериализуемые поля."""
+        """
+        Return a JSON-serializable dictionary representation of the model.
+
+        Uses FastAPI's `jsonable_encoder` for safe serialization of complex types.
+        """
         default_dict = self.model_dump()
         return jsonable_encoder(default_dict)
 
 
 class BulkResult(BaseModel):
     """
-    Результат bulk-операции
+    Represents the result of a bulk operation.
+
     Attributes:
-        success (int): Количество успешно обработанных записей
-        failed (int | list[Any]): Количество неудачных записей или список с деталями
-        skipped (int | None): Количество пропущенных записей, если применимо
-        total (int | None): Общее количество обработанных записей
-        meta (dict[str, Any] | None): Дополнительная информация по выполненной операции
+        success (int): Number of successfully processed items.
+        failed (int | list[Any]): Number of failed items or a list with failure details.
+        skipped (int | None): Number of skipped items, if applicable.
+        total (int | None): Total number of items processed.
+        meta (dict[str, Any] | None): Optional metadata or additional context about the operation.
     """
     success: int = Field(..., description="Количество успешно обработанных записей")
     failed: int | list[Any] = Field(

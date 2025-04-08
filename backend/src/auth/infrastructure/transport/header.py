@@ -5,22 +5,31 @@ from src.auth.infrastructure.transport.base import IAuthTransport
 
 
 class HeaderTransport(IAuthTransport):
+    """
+    Transport strategy using HTTP headers to manage tokens.
+    """
+
     def __init__(
         self,
         header_name: str,
         token_type_prefix: str | None = None,
     ) -> None:
         """
-        Транспорт для установки/удаления JWT токена через заголовки.
+        Initialize header transport.
 
-        :param header_name: Название заголовка (например, Authorization).
-        :param token_type_prefix: Префикс типа токена (например, "Bearer").
+        :param header_name: The name of the header to use (e.g., "Authorization").
+        :param token_type_prefix: Optional prefix like "Bearer" to prepend to the token.
         """
         self.header_name = header_name
         self.token_type_prefix = token_type_prefix
 
     def set_token(self, response: Response, token: str) -> None:
-        """Установить токен в заголовок ответа."""
+        """
+        Set the token in the specified header of the response.
+
+        :param response: The outgoing HTTP response.
+        :param token: The token to be set.
+        """
         if self.token_type_prefix:
             token_value = f"{self.token_type_prefix} {token}"
         else:
@@ -28,11 +37,20 @@ class HeaderTransport(IAuthTransport):
         response.headers[self.header_name] = token_value
 
     def delete_token(self, response: Response) -> None:
-        """Удалить токен из заголовка"""
+        """
+        Remove the token from the response header.
+
+        :param response: The outgoing HTTP response.
+        """
         response.headers[self.header_name] = ""
 
     def get_token(self, request: Request) -> str | None:
-        """Получить токен из заголовка"""
+        """
+        Extract the token from the request header.
+
+        :param request: The incoming HTTP request.
+        :return: Token string or None.
+        """
         header = request.headers.get(self.header_name, None)
         if header:
             try:

@@ -11,7 +11,7 @@ async def register_user(
     """Регистрация пользователя в системе"""
     user_data = UserCreate(
         **user_data.model_dump(mode='json'),
-        hashed_password=hash_password(user_data.password).decode('utf-8')
+        hashed_password=hash_password(user_data.password)
     )
     async with uow:
         new_user = await uow.users.add(user_data)

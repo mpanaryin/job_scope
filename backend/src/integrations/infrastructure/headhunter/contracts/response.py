@@ -1,6 +1,6 @@
 from pydantic import Field
 
-from src.core.schemas import CustomModel
+from src.core.domain.entities import CustomModel
 
 
 class HHClusterGroup(CustomModel):

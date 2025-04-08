@@ -1,7 +1,7 @@
 from elasticsearch import helpers
 
-from src.core.schemas import BulkResult
-from src.db.elastic import es_client
+from src.core.domain.entities import BulkResult
+from src.core.infrastructure.clients.elastic import get_elastic_client
 from src.vacancies.application.mappers.vacancies import VacancyDomainToElasticMapper
 from src.vacancies.domain.entities import Vacancy, VacancySearchQuery
 from src.vacancies.domain.interfaces import IVacancySearchRepository
@@ -9,10 +9,12 @@ from src.vacancies.domain.interfaces import IVacancySearchRepository
 
 class ESVacancySearchRepository(IVacancySearchRepository):
     """ElasticSearch Vacancy Search Repository"""
+    def __init__(self):
+        self.es_client = get_elastic_client()
 
     async def bulk_add(self, vacancies: list[Vacancy]) -> BulkResult:
         vacancies = VacancyDomainToElasticMapper().map(vacancies)
-        success, failed = await helpers.async_bulk(es_client, vacancies)
+        success, failed = await helpers.async_bulk(self.es_client, vacancies)
         return BulkResult(success=success, failed=failed, total=len(vacancies))
 
     async def search(self, query: VacancySearchQuery):
@@ -55,5 +57,5 @@ class ESVacancySearchRepository(IVacancySearchRepository):
         if query.sort_by:
             body["sort"] = [{query.sort_by: {"order": query.sort_order}}]
 
-        response = await es_client.search(index="vacancies", body=body)
+        response = await self.es_client.search(index="vacancies", body=body)
         return response

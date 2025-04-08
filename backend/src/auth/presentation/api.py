@@ -4,7 +4,7 @@ from starlette.requests import Request
 from src.auth.application.use_cases.authentication import authenticate
 from src.auth.presentation.dependencies import JWTAuthDep, get_redis_token_storage
 from src.auth.presentation.permissions import access_control
-from src.auth.domain.entities import AuthUser
+from src.auth.domain.dtos import AuthUserDTO
 from src.users.domain.dtos import UserReadDTO
 from src.users.infrastructure.db.unit_of_work import PGUserUnitOfWork
 
@@ -12,29 +12,51 @@ auth_api_router = APIRouter()
 
 
 @auth_api_router.post("/users/login")
-async def login(credentials: AuthUser, auth: JWTAuthDep):
-    """Вход в аккаунт"""
+async def login(credentials: AuthUserDTO, auth: JWTAuthDep):
+    """
+    Authenticate user and issue JWT tokens.
+
+    :param credentials: User email and password.
+    :param auth: Authentication service dependency.
+    :return: Success message
+    """
     await authenticate(credentials, PGUserUnitOfWork(), auth)
     return {"msg": "Tokens set"}
 
 
 @auth_api_router.post("/users/logout")
 async def logout(auth: JWTAuthDep):
-    """Выход из аккаунта"""
+    """
+    Log out the current user and revoke all active tokens.
+
+    :param auth: Authentication service dependency.
+    :return: Success message
+    """
     await auth.unset_tokens()
     return {"msg": "Tokens deleted"}
 
 
 @auth_api_router.post("/users/refresh")
 async def refresh(auth: JWTAuthDep):
-    """Выход из аккаунта"""
+    """
+    Refresh the access token using a valid refresh token.
+
+    :param auth: Authentication service dependency.
+    :return: Success message
+    """
     await auth.refresh_access_token()
     return {"msg": "The token has been refresh"}
 
 
 @auth_api_router.post("/users/revoke_tokens/{user_id}")
 async def revoke_tokens(user_id: str, token_storage=Depends(get_redis_token_storage)):
-    """Отозвать токены пользователя"""
+    """
+    Revoke all tokens for a specific user by ID (admin action).
+
+    :param user_id: The ID of the user whose tokens should be revoked.
+    :param token_storage: Token storage service.
+    :return: Success message with user ID.
+    """
     await token_storage.revoke_tokens_by_user(user_id)
     return {"msg": f"Tokens revoked for user {user_id}"}
 
@@ -42,5 +64,14 @@ async def revoke_tokens(user_id: str, token_storage=Depends(get_redis_token_stor
 @auth_api_router.get("/users/me")
 @access_control(open=True)
 async def get_my_account(request: Request) -> UserReadDTO:
-    """Получаем свой профиль, если мы авторизованы"""
+    """
+    Retrieve the profile of the currently authenticated user.
+
+    :param request: Current request object.
+    :return: Authenticated user's data.
+    """
+    print('HELLOWEHERE')
+    print(request.state.user)
+
+
     return request.state.user

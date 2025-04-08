@@ -1,4 +1,4 @@
-from src.integrations.headhunter.client import HeadHunterClient
+from src.integrations.infrastructure.headhunter.client import HeadHunterClient
 from src.vacancies.infrastructure.db.unit_of_work import PGVacancyUnitOfWork
 from src.vacancies.infrastructure.elastic.repositories import ESVacancySearchRepository
 

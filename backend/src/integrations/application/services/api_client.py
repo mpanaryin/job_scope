@@ -3,31 +3,25 @@ from enum import Enum
 from typing import Literal
 from urllib.parse import urljoin
 
-from aiohttp import ClientResponse
-
-from src.utils.aiohttp_client import AiohttpClient
+from src.integrations.domain.interfaces import IAsyncHttpClient
 
 
 class AuthType(Enum):
-    """Тип авторизации для запросов"""
+    """
+    Type of authorization used in HTTP requests.
+    """
     NO = "NO"
     BASIC = "Basic"
     BEARER_TOKEN = "BearerToken"
     TOKEN_TOKEN = "TokenToken"
 
 
-class TokenAuth:
-    def __init__(self, token_name: str, token_value: str):
-        self.token_name = token_name
-        self.token_value = token_value
-
-    def __call__(self, r):
-        r.headers["Authorization"] = self.token_name + " " + self.token_value
-        return r
-
-
 class AuthMixin:
-    """Mixin определяющий тип авторизации"""
+    """
+    Mixin that provides authorization headers for HTTP requests.
+
+    Supports multiple authorization schemes, such as Bearer, Token, and Basic.
+    """
     auth_type: AuthType
     username: str | None
     password: str | None
@@ -35,7 +29,11 @@ class AuthMixin:
 
     @property
     def auth_headers(self):
-        """Создает заголовки авторизации"""
+        """
+        Generate the appropriate authorization headers based on the configured auth type.
+
+        :return: A dictionary with the "Authorization" header if applicable, otherwise empty.
+        """
         if self.auth_type == AuthType.TOKEN_TOKEN and self.token:
             return {"Authorization": f'Token {self.token}'}
         elif self.auth_type == AuthType.BEARER_TOKEN and self.token:
@@ -47,9 +45,11 @@ class AuthMixin:
     @staticmethod
     def _to_native_string(string, encoding="ascii"):
         """
-        Данная функция принимает строковый объект, независимо от его типа, и возвращает его представление в
-        родном строковом формате, выполняя кодирование и декодирование, если это необходимо.
-        По умолчанию используется кодировка ASCII, если не указано иное.
+        Convert a byte or string object into a native string.
+
+        :param string: String or bytes to convert.
+        :param encoding: Encoding used to decode bytes (default is "ascii").
+        :return: A native Python string.
         """
         if isinstance(string, str):
             out = string
@@ -58,24 +58,46 @@ class AuthMixin:
         return out
 
     def _basic_auth_str(self) -> str:
-        """Возвращает строку Basic Auth"""
+        """
+        Generate the Basic authorization header value.
+
+        :return: A string like "Basic dXNlcjpwYXNz".
+        """
         username = self.username
         password = self.password
         if isinstance(self.username, str):
             username = self.username.encode("latin1")
-        if isinstance(self.username, str):
-            password = self.username.encode("latin1")
+        if isinstance(self.password, str):
+            password = self.password.encode("latin1")
         return "Basic " + self._to_native_string(
             b64encode(b":".join((username, password))).strip()
         )
 
 
-class APIClient(AuthMixin):
-    """Сервис для отправки запросов"""
+class APIClientService(AuthMixin):
+    """
+    Generic HTTP client service with built-in authentication support.
+
+    This service is designed to abstract the logic of sending HTTP requests to external APIs.
+    It supports various authentication types (e.g., Bearer, Basic)
+    and uses an injected asynchronous HTTP client that conforms to the IAsyncHttpClient interface.
+
+    Args:
+        source_url: Base URL of the external API.
+        client: Asynchronous HTTP client implementation (e.g., AiohttpClient).
+        headers: Optional additional headers to include in every request.
+        auth_type: Authorization type (NO, BASIC, BEARER_TOKEN, TOKEN_TOKEN).
+        username: Username for basic authentication.
+        password: Password for basic authentication.
+        token: Access token (for Bearer or Token schemes).
+
+    Methods:
+        request(...): Send an HTTP request using the configured method and parameters.
+    """
     def __init__(
         self,
         source_url: str,
-        client: AiohttpClient = AiohttpClient,
+        client: IAsyncHttpClient,
         headers: dict | None = None,
         auth_type: AuthType = AuthType.NO,
         username: str | None = None,
@@ -99,7 +121,19 @@ class APIClient(AuthMixin):
         params: dict | None = None,
         headers: dict | None = None,
         **kwargs
-    ) -> ClientResponse:
+    ):
+        """
+        Execute an HTTP request using the configured method and parameters.
+
+        :param method: HTTP method to use (GET, POST, PUT, DELETE, PATCH).
+        :param endpoint: Relative path to the resource on the external API.
+        :param json_data: Optional JSON body.
+        :param params: Optional query parameters.
+        :param headers: Optional additional headers.
+        :param kwargs: Extra keyword arguments passed to the HTTP client.
+        :return: HTTP response from the external service.
+        :raises ValueError: If the provided method is unsupported.
+        """
         headers = headers or {}
         request_params = {
             "url": urljoin(self.source_url, endpoint),

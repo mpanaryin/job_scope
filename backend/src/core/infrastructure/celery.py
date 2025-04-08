@@ -11,15 +11,21 @@ celery_app = Celery(
 
 @setup_logging.connect
 def config_loggers(*args, **kwargs):
+    """
+    Configure Celery logging using the app's standard logging setup.
+    This disables Celery's default logger configuration.
+    """
     from logging.config import dictConfig  # noqa
-    from src.core.logging_setup import LOGGING_CONFIG  # noqa
+    from src.core.infrastructure.logging_setup import LOGGING_CONFIG  # noqa
 
     dictConfig(LOGGING_CONFIG)
 
 
+# Automatically discover tasks
 celery_app.autodiscover_tasks(["src.vacancies.presentation.tasks"])
 
-# Настройки Celery Beat (задачи по расписанию)
+# Optional Celery Beat configuration for periodic tasks
+# Uncomment and adjust the schedule as needed
 # celery_app.conf.beat_schedule = {
 #     "fetch_vacancies_every_10_min": {
 #         "task": "src.vacancies.presentation.tasks.collect_vacancies_task",

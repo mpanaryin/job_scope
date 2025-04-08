@@ -2,6 +2,17 @@ from fastapi import status
 
 
 class AppException(Exception):
+    """
+    Base application exception.
+
+    This class is used as the foundation for all custom exceptions in the app.
+    It includes HTTP status code, a human-readable message, and optional context.
+
+    Attributes:
+        status_code (int): HTTP status code associated with the exception.
+        detail (str): A human-readable message describing the error.
+        kwargs (dict | None): Additional context or metadata to include in the response.
+    """
     status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
     detail = "Server error"
     kwargs: dict | None = None

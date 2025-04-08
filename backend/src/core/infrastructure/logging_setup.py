@@ -1,6 +1,17 @@
+"""
+Logging configuration module.
+
+This module sets up logging automatically upon import using `logging.config.dictConfig`.
+It defines both stream (stdout) and rotating file handlers with JSON and plain formats.
+
+To activate logging, simply import:
+    import src.core.infrastructure.logging_setup
+
+No functions need to be called explicitly — importing is enough to configure logging globally.
+"""
+
 import os
 import logging.config
-from logging.handlers import TimedRotatingFileHandler
 
 
 LOG_DIR = "/app/logs"
@@ -15,7 +26,8 @@ LOGGING_CONFIG = {
         },
         "json": {
             "()": "pythonjsonlogger.json.JsonFormatter",
-            "format": "%(asctime)s %(levelname)s %(message)s %(exc_info)s %(name)s %(filename)s %(funcName)s %(lineno)d %(process)d %(threadName)s",
+            "format": "%(asctime)s %(levelname)s %(message)s %(exc_info)s %(name)s %(filename)s "
+                      "%(funcName)s %(lineno)d %(process)d %(threadName)s",
             "rename_fields": {
                 "asctime": "@timestamp",
                 "levelname": "log.level",
@@ -32,7 +44,9 @@ LOGGING_CONFIG = {
         },
         "full_json": {
             "()": "pythonjsonlogger.json.JsonFormatter",
-            "format": "%(asctime)s %(created)f %(filename)s %(funcName)s %(levelname)s %(levelno)s %(lineno)d %(message)s %(module)s %(msecs)d %(name)s %(pathname)s %(process)d %(processName)s %(relativeCreated)d %(thread)d %(threadName)s %(exc_info)s",
+            "format": "%(asctime)s %(created)f %(filename)s %(funcName)s %(levelname)s %(levelno)s "
+                      "%(lineno)d %(message)s %(module)s %(msecs)d %(name)s %(pathname)s %(process)d "
+                      "%(processName)s %(relativeCreated)d %(thread)d %(threadName)s %(exc_info)s",
             "rename_fields": {
                 "asctime": "@timestamp",
                 "levelname": "log.level",

@@ -4,7 +4,7 @@ from typing import Any, Sequence
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.core.schemas import BulkResult
+from src.core.domain.entities import BulkResult
 from src.vacancies.application.mappers.vacancies import VacancyDomainToDTOMapper
 from src.vacancies.domain.entities import Vacancy
 from src.vacancies.domain.interfaces import IVacancyRepository

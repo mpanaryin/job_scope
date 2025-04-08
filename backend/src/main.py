@@ -8,18 +8,17 @@ from prometheus_fastapi_instrumentator import Instrumentator
 from sqladmin import Admin
 from starlette.staticfiles import StaticFiles
 
-import src.core.logging_setup  # важно объявить до всех импортов
 from src.core.config import settings
-from src.core.exc import AppException
+from src.core.domain.exceptions import AppException
 
-from src.core.middlewares import SecurityMiddleware, AuthenticationMiddleware, JWTRefreshMiddleware
+from src.core.presentation.middlewares import SecurityMiddleware, AuthenticationMiddleware, JWTRefreshMiddleware
 from src.auth.presentation.api import auth_api_router
 from src.auth.presentation.views import auth_view_router
 from src.users.presentation.api import UserCRUDRouter, user_api_router
 from src.users.presentation.admin import UserAdmin
 from src.db.engine import engine
 from src.db.utils import create_db_and_tables
-from src.utils.aiohttp_client import AiohttpClient
+from src.integrations.infrastructure.http.aiohttp_client import AiohttpClient
 from src.vacancies.presentation.admin import VacancyAdmin
 from src.vacancies.presentation.api import vacancy_api_router, VacancyCRUDRouter
 

@@ -18,7 +18,8 @@ MODEL_ATTR = str | InstrumentedAttribute
 
 
 class CRUDBaseMeta(type):
-    """Metaclass used to specify class variables in ModelView.
+    """
+    Metaclass used to specify class variables in ModelView.
 
     Danger:
         This class should almost never be used directly.
@@ -51,6 +52,20 @@ class CRUDBaseMeta(type):
 
 
 class CRUDBase(metaclass=CRUDBaseMeta):
+    """
+    Base class for creating generic CRUD operations using SQLAlchemy models.
+
+    This class is intended to be subclassed with a specific SQLAlchemy model.
+    It provides a standard interface for basic database operations and form generation.
+
+    Attributes:
+        pk_columns (ClassVar[tuple[Column]]): Primary key columns of the model.
+        session_maker (ClassVar): SQLAlchemy session maker (async).
+        is_async (ClassVar[bool]): Indicates if async session is used.
+        name_plural (ClassVar[str]): Plural name of the model, used in UI.
+        form_columns (ClassVar[Sequence[str]]): List of form-included attributes.
+        form_excluded_columns (ClassVar[Sequence[str]]): List of form-excluded attributes.
+    """
     # Internals
     pk_columns: ClassVar[tuple[Column]]
     session_maker: ClassVar[sessionmaker | async_sessionmaker]
@@ -125,7 +140,11 @@ class CRUDBase(metaclass=CRUDBaseMeta):
         return defaults
 
     def get_form_columns(self) -> list[str]:
-        """Get list of properties to display in the form."""
+        """
+        Determine which fields to include in the form based on include/exclude configuration.
+
+        :return: List of field names.
+        """
         form_columns = getattr(self, "form_columns", None)
         form_excluded_columns = getattr(self, "form_excluded_columns", None)
 
@@ -136,6 +155,12 @@ class CRUDBase(metaclass=CRUDBaseMeta):
         )
 
     async def _run_query(self, stmt: ClauseElement) -> Any:
+        """
+        Execute a SQLAlchemy select statement asynchronously.
+
+        :param stmt: SQLAlchemy statement to execute.
+        :return: List of scalar results.
+        """
         async with self.session_maker(expire_on_commit=False) as session:
             result = await session.execute(stmt)
             return result.scalars().unique().all()
@@ -197,6 +222,14 @@ class CRUDBase(metaclass=CRUDBaseMeta):
     async def _set_attributes_async(
         self, session: AsyncSession, obj: Any, data: dict
     ) -> Any:
+        """
+        Set model attributes based on input data, including handling of relationships.
+
+        :param session: Async SQLAlchemy session.
+        :param obj: Model instance being modified.
+        :param data: Data to apply.
+        :return: Updated model instance.
+        """
         for key, value in data.items():
             column = self._mapper.columns.get(key)
             relation = self._mapper.relationships.get(key)
@@ -236,34 +269,54 @@ class CRUDBase(metaclass=CRUDBaseMeta):
     async def on_model_change(
         self, data: dict, model: Any, is_created: bool, request: Request
     ) -> None:
-        """Perform some actions before a model is created or updated.
-        By default does nothing.
+        """
+        Hook executed before a model instance is created or updated.
+
+        :param data: Input data dictionary.
+        :param model: SQLAlchemy model instance.
+        :param is_created: True if the operation is create, False if update.
+        :param request: FastAPI Request object.
         """
 
     async def after_model_change(
         self, data: dict, model: Any, is_created: bool, request: Request
     ) -> None:
-        """Perform some actions after a model was created
-        or updated and committed to the database.
+        """
+        Hook executed after a model instance has been created or updated.
 
-        Note: By default does nothing
+        :param data: Input data dictionary.
+        :param model: SQLAlchemy model instance.
+        :param is_created: True if the operation is create, False if update.
+        :param request: FastAPI Request object.
         """
         # db_obj = await self.get(pk=model.id)
         # for key, value in db_obj.__dict__.items():
         #     setattr(model, key, value)
 
     async def on_model_delete(self, model: Any, request: Request) -> None:
-        """Perform some actions before a model is deleted.
-        By default does nothing.
+        """
+        Hook executed before a model instance is deleted.
+
+        :param model: SQLAlchemy model instance.
+        :param request: FastAPI Request object.
         """
 
     async def after_model_delete(self, model: Any, request: Request) -> None:
-        """Perform some actions after a model is deleted.
-        By default do nothing.
+        """
+        Hook executed after a model instance is deleted.
+
+        :param model: SQLAlchemy model instance.
+        :param request: FastAPI Request object.
         """
 
     async def create(self, data: dict[str, Any], request: Request) -> Any:
-        """Create a new model object"""
+        """
+        Create a new model instance in the database.
+
+        :param data: Dictionary containing attributes for the new model.
+        :param request: FastAPI Request object, used for context (e.g. user info).
+        :return: Created model instance.
+        """
         obj = self.model()
         async with self.session_maker(expire_on_commit=False) as session:
             await self.on_model_change(data, obj, True, request)
@@ -276,7 +329,12 @@ class CRUDBase(metaclass=CRUDBaseMeta):
         return obj
 
     async def get_by_pk(self, pk: Any) -> Any:
-        """Get the model object"""
+        """
+        Retrieve a model instance by its primary key.
+
+        :param pk: Primary key or unique identifier.
+        :return: Model instance if found, otherwise None.
+        """
         stmt = self._stmt_by_identifier(pk)
 
         for relation in self._form_relations:
@@ -288,7 +346,14 @@ class CRUDBase(metaclass=CRUDBaseMeta):
             return obj
 
     async def get_multi(self, request: Request, offset: int = 0, limit: int = 100) -> list[Any]:
-        """Get model objects"""
+        """
+        Retrieve multiple model instances with optional pagination.
+
+        :param request: FastAPI Request object, used for context.
+        :param offset: Number of items to skip (default is 0).
+        :param limit: Maximum number of items to return (default is 100).
+        :return: List of model instances.
+        """
         stmt = select(self.model)
 
         for relation in self._form_relations:
@@ -301,7 +366,14 @@ class CRUDBase(metaclass=CRUDBaseMeta):
     async def update_by_pk(
         self, pk: Any, data: dict[str, Any], request: Request
     ) -> Any:
-        """Update the model object"""
+        """
+        Update an existing model instance by primary key.
+
+        :param pk: Primary key or unique identifier of the object to update.
+        :param data: Dictionary of fields to update.
+        :param request: FastAPI Request object for context-aware logic.
+        :return: Updated model instance.
+        """
         stmt = self._stmt_by_identifier(pk)
 
         for relation in self._form_relations:
@@ -318,7 +390,13 @@ class CRUDBase(metaclass=CRUDBaseMeta):
             return obj
 
     async def delete_by_pk(self, pk: Any, request: Request) -> Any:
-        """Delete the model object"""
+        """
+        Delete a model instance by primary key.
+
+        :param pk: Primary key or unique identifier of the object to delete.
+        :param request: FastAPI Request object for context-aware logic.
+        :return: Deleted model instance.
+        """
         async with self.session_maker() as session:
             result = await session.execute(self._get_delete_stmt(pk))
             obj = result.scalars().first()

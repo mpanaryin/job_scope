@@ -99,8 +99,6 @@ class Settings(BaseSettings):
         )
 
     EMAIL_TEST_USER: EmailStr = "mytest@example.com"  # type: ignore
-    FIRST_SUPERUSER: EmailStr
-    FIRST_SUPERUSER_PASSWORD: str
 
     class Config:
         case_sensitive = True

@@ -15,7 +15,7 @@ class UserService(CRUDBase, model=orm.UserDB):
         password = data.pop("password", "")
         obj = self.model(**data)
         async with self.session_maker(expire_on_commit=False) as session:
-            obj.hashed_password = hash_password(password).decode('utf-8')
+            obj.hashed_password = hash_password(password)
             session.add(obj)
             await session.commit()
             if request:

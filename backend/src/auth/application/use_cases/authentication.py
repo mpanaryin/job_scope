@@ -1,12 +1,23 @@
-from src.auth.domain.entities import AuthUser
+from src.auth.domain.dtos import AuthUserDTO
 from src.auth.domain.exceptions import InvalidCredentials
 from src.auth.domain.interfaces import ITokenAuth
 from src.auth.infrastructure.services.password import check_password
+from src.users.domain.entities import User
 from src.users.domain.interfaces import IUserUnitOfWork
 
 
-async def authenticate(credentials: AuthUser, uow: IUserUnitOfWork, auth: ITokenAuth):
-    """Аутентификация пользователя"""
+async def authenticate(credentials: AuthUserDTO, uow: IUserUnitOfWork, auth: ITokenAuth) -> User:
+    """
+    Authenticates a user based on provided credentials.
+
+    Verifies the user's email and password combination, and if valid, sets access and refresh tokens.
+
+    :param credentials: User credentials (email and password).
+    :param uow: Unit of work to access user repository.
+    :param auth: JWT authentication service for setting tokens.
+    :raises InvalidCredentials: If the password is incorrect.
+    :return: User instance.
+    """
     async with uow:
         user = await uow.users.get_by_email(credentials.email)
 

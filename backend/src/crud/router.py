@@ -6,14 +6,30 @@ from sqlalchemy.exc import IntegrityError
 from starlette.requests import Request
 
 from src.auth.presentation.permissions import access_control
-from src.core.exceptions import AlreadyExists, NotFound
+from src.core.domain.exceptions import AlreadyExists, NotFound
 from src.crud.base import CRUDBase
-
 
 Schema = TypeVar("Schema", bound=BaseModel)
 
 
 class CRUDRouter:
+    """
+    A generic CRUD router generator for FastAPI.
+
+    Automatically generates standard REST endpoints (create, read, update, delete)
+    based on a given CRUD service and Pydantic contracts.
+
+    Attributes:
+        crud (CRUDBase): The service class responsible for database operations.
+        create_schema (Type[BaseModel]): Schema for data creation.
+        update_schema (Type[BaseModel]): Schema for data update.
+        read_schema (Type[BaseModel]): Schema for response serialization.
+        router (APIRouter): FastAPI router where endpoints will be registered.
+        methods (list[str]): Allowed HTTP methods (GET, POST, PUT, DELETE).
+        create_as_form (bool): Whether to use form-based data parsing for creation.
+        update_as_form (bool): Whether to use form-based data parsing for updating.
+        access_control (access_control): Access control decorator for endpoints.
+    """
     crud: CRUDBase
     create_schema: Schema
     update_schema: Schema
@@ -25,6 +41,12 @@ class CRUDRouter:
     access_control: access_control = access_control(superuser=True)
 
     def create(self) -> Callable:
+        """
+        Register POST / endpoint to create a new object.
+
+        Returns:
+            Callable: FastAPI route handler function.
+        """
         if self.create_as_form:
             @self.router.post("/", response_model=self.read_schema)
             @self.access_control
@@ -46,6 +68,12 @@ class CRUDRouter:
         return _create
 
     def get_by_pk(self) -> Callable:
+        """
+        Register GET /{pk} endpoint to retrieve an object by its primary key.
+
+        Returns:
+            Callable: FastAPI route handler function.
+        """
         @self.router.get("/{pk}", response_model=self.read_schema)
         @self.access_control
         async def _get(request: Request, pk: Any):
@@ -56,6 +84,12 @@ class CRUDRouter:
         return _get
 
     def get_multi(self) -> Callable:
+        """
+        Register GET / endpoint to retrieve a list of objects with pagination.
+
+        Returns:
+            Callable: FastAPI route handler function.
+        """
         @self.router.get("/", response_model=list[self.read_schema])
         @self.access_control
         async def _get_multi(request: Request, offset: int = 0, limit: int = 100):
@@ -64,6 +98,12 @@ class CRUDRouter:
         return _get_multi
 
     def update_by_pk(self) -> Callable:
+        """
+        Register PATCH /{pk} endpoint to update an object by its primary key.
+
+        Returns:
+            Callable: FastAPI route handler function.
+        """
         if self.update_as_form:
             @self.router.patch("/{pk}", response_model=self.read_schema)
             @self.access_control
@@ -93,6 +133,12 @@ class CRUDRouter:
         return _update
 
     def delete_by_pk(self) -> Callable:
+        """
+        Register DELETE /{pk} endpoint to delete an object by its primary key.
+
+        Returns:
+            Callable: FastAPI route handler function.
+        """
         @self.router.delete("/{pk}", response_model=self.read_schema)
         @self.access_control
         async def _delete(request: Request, pk: Any):
@@ -101,7 +147,9 @@ class CRUDRouter:
         return _delete
 
     def init_router(self):
-        """Router initialization"""
+        """
+        Initialize the router by registering CRUD endpoints based on allowed methods.
+        """
         if 'POST' in self.methods:
             self.create()
         if 'GET' in self.methods:
@@ -113,6 +161,11 @@ class CRUDRouter:
             self.delete_by_pk()
 
     def get_router(self):
-        """Get the router for include_router in FastAPI"""
+        """
+        Get the fully initialized FastAPI router.
+
+        Returns:
+            APIRouter: The configured FastAPI router instance.
+        """
         self.init_router()
         return self.router

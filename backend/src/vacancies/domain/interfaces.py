@@ -1,6 +1,6 @@
 import abc
 
-from src.core.schemas import BulkResult
+from src.core.domain.entities import BulkResult
 from src.vacancies.domain.entities import Vacancy, VacancySearchQuery
 
 

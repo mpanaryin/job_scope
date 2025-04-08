@@ -1,7 +1,7 @@
 from pydantic import AnyUrl
 
-from src.integrations.headhunter.schemas.response import HHVacancy
-from src.integrations.interfaces import TVacancy
+from src.integrations.infrastructure.headhunter.contracts.response import HHVacancy
+from src.integrations.domain.interfaces import TVacancy
 from src.vacancies.application.mappers.helpers import HHVacancyToDomainMapper
 from src.vacancies.domain.entities import Vacancy
 from src.vacancies.domain.dtos import VacancySource, VacancyCreateDTO

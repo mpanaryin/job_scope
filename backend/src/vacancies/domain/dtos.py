@@ -1,10 +1,9 @@
 import datetime
 import uuid
-from typing import Literal
 
-from pydantic import AnyUrl, field_serializer, Field
+from pydantic import AnyUrl, field_serializer
 
-from src.core.schemas import CustomModel
+from src.core.domain.entities import CustomModel
 from src.vacancies.domain.entities import VacancySource
 
 

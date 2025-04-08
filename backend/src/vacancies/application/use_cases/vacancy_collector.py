@@ -1,5 +1,5 @@
-from src.core.schemas import BulkResult
-from src.integrations.interfaces import TSearchParams, IVacancySourceClient, TVacancy
+from src.core.domain.entities import BulkResult
+from src.integrations.domain.interfaces import TSearchParams, IVacancySourceClient, TVacancy
 from src.vacancies.application.mappers.vacancies import VacancyAPIToDomainMapper
 from src.vacancies.domain.entities import Vacancy
 from src.vacancies.domain.interfaces import IVacancySearchRepository, IVacancyUnitOfWork

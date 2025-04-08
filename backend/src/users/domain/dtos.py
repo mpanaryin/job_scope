@@ -2,16 +2,22 @@ import re
 
 from pydantic import Field, field_validator
 
-from src.core.constants import STRONG_PASSWORD_PATTERN
-from src.core.schemas import CustomModel
+from src.core.domain.constants import STRONG_PASSWORD_PATTERN
+from src.core.domain.entities import CustomModel
 
 
 class UserReadDTO(CustomModel):
-    id: int
-    email: str
-    is_active: bool
-    is_superuser: bool
-    is_verified: bool
+    """
+    Data Transfer Object for user output.
+
+    This model is designed to represent both authenticated and anonymous users,
+    allowing unified usage in views like `/users/me`.
+    """
+    id: int | None
+    email: str | None
+    is_active: bool = True
+    is_superuser: bool = False
+    is_verified: bool = False
 
 
 class UserCreateDTO(CustomModel):

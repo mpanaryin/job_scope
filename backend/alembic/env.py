@@ -4,7 +4,7 @@ from sqlalchemy import engine_from_config, pool
 from alembic import context
 from src.core.config import settings
 from src.db.base import Base
-# Импорты моделей, чтобы SQLAlchemy "увидел" их
+# Import models required for database initialization
 from src.users.infrastructure.db.orm import UserDB
 from src.vacancies.infrastructure.db.orm import Vacancy
 

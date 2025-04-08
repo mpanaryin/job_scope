@@ -4,7 +4,7 @@ from typing import Literal
 
 from pydantic import Field
 
-from src.core.schemas import CustomModel
+from src.core.domain.entities import CustomModel
 
 
 class VacancySource(str, Enum):
