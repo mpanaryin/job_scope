@@ -14,16 +14,34 @@ logger = logging.getLogger(__name__)
 
 
 class PGVacancyRepository(IVacancyRepository):
-    """Postgresql Vacancy Repository"""
+    """
+    PostgreSQL implementation of the Vacancy repository.
+
+    Handles bulk insert and update operations for normalized domain vacancies
+    using PostgreSQL's ON CONFLICT clause to prevent duplicates.
+
+    Attributes:
+        session (AsyncSession): Active SQLAlchemy asynchronous session.
+    """
+
     def __init__(self, session: AsyncSession) -> None:
+        """
+        Initialize the repository with an active database session.
+
+        :param session: Async SQLAlchemy session used for executing queries.
+        """
         super().__init__()
         self.session = session
 
     async def bulk_add_or_update(self, vacancies: list[Vacancy]) -> BulkResult:
         """
-        Добавляет или обновляет вакансии массово
-        :param vacancies: Список вакансий для создания
-        :return int: Количество обработанных вакансий
+        Bulk insert or update vacancy records in the database.
+
+        Uses PostgreSQL `ON CONFLICT DO UPDATE` to either create new records
+        or update existing ones based on (source_name, source_id).
+
+        :param vacancies: List of normalized Vacancy domain models.
+        :return: BulkResult summarizing the number of created and updated rows.
         """
         vacancies = VacancyDomainToDTOMapper().map(vacancies)
         stmt = insert(orm.Vacancy).values([vacancy.model_dump() for vacancy in vacancies])
@@ -55,7 +73,13 @@ class PGVacancyRepository(IVacancyRepository):
 
     def _build_bulk_result(self, rows: Sequence[Any], total: int) -> BulkResult:
         """
-        Подсчёт количества созданных и обновлённых записей
+        Determine how many records were created vs updated.
+
+        Compares `created_at` and `updated_at` timestamps to distinguish between insert and update operations.
+
+        :param rows: List of returned rows with created_at and updated_at fields.
+        :param total: Total number of records processed.
+        :return: BulkResult with count of successful and failed operations.
         """
         created, updated = 0, 0
         for row in rows:

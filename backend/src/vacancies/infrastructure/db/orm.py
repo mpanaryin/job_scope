@@ -18,31 +18,31 @@ class Vacancy(Base):
     id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), primary_key=True, default=uuid6.uuid6
     )
-    # Источник вакансии
+    # Source
     source_name: Mapped[VacancySource] = mapped_column(String(length=30), nullable=False, index=True)
     source_id: Mapped[int] = mapped_column(Integer, nullable=False, index=True)
     url: Mapped[str] = mapped_column(String(length=2048), nullable=False)
-    # Название вакансии
+    # Name
     name: Mapped[str] = mapped_column(String(length=100), nullable=False)
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
-    # Зарплата
+    # Salary
     salary_from: Mapped[int | None] = mapped_column(Integer, nullable=True)
     salary_to: Mapped[int | None] = mapped_column(Integer, nullable=True)
     salary_currency: Mapped[str | None] = mapped_column(String(length=5), nullable=True)
     salary_gross: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
-    # Данные по работодателю
+    # Employer
     area_name: Mapped[str | None] = mapped_column(String(length=256), nullable=True)
     employer_name: Mapped[str | None] = mapped_column(String(length=512), nullable=True)
-    # Требования к вакансии
+    # Requirement
     employment: Mapped[str | None] = mapped_column(String(length=50), nullable=True)
     experience: Mapped[str | None] = mapped_column(String(length=50), nullable=True)
     schedule: Mapped[str | None] = mapped_column(String(length=50), nullable=True)
     has_test: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
-    # Дополнительная информация
+    # Additional
     is_archived: Mapped[bool] = mapped_column(Boolean, default=False, index=True, nullable=False)
     type: Mapped[str | None] = mapped_column(String(length=100), nullable=True)
     meta: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
-    # Даты
+    # Dates
     published_at: Mapped[datetime.datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, index=True
     )

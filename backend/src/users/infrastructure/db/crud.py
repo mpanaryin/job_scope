@@ -10,8 +10,21 @@ from src.crud.base import CRUDBase
 
 
 class UserService(CRUDBase, model=orm.UserDB):
+    """
+    Service for managing user-related database operations.
+
+    Inherits from CRUDBase and provides user-specific implementations
+    for creating and retrieving user records.
+    """
 
     async def create(self, data: dict[str, Any], request: Request | None = None) -> orm.UserDB:
+        """
+        Create a new user record with hashed password.
+
+        :param data: Dictionary of user fields, including raw password.
+        :param request: Optional FastAPI request object used for lifecycle hooks.
+        :return: The created UserDB instance.
+        """
         password = data.pop("password", "")
         obj = self.model(**data)
         async with self.session_maker(expire_on_commit=False) as session:
@@ -23,7 +36,12 @@ class UserService(CRUDBase, model=orm.UserDB):
         return obj
 
     async def get_by_email(self, email: str) -> orm.UserDB:
-        """Get the model object"""
+        """
+        Retrieve a user by email address.
+
+        :param email: Email address of the user to retrieve.
+        :return: A UserDB instance if found, otherwise None.
+        """
         stmt = select(self.model).where(self.model.email == email).limit(1)
 
         for relation in self._form_relations:

@@ -28,7 +28,7 @@ logger = logging.getLogger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    await create_db_and_tables()  # Нужен только если нет alembic
+    await create_db_and_tables()  # Only needed if Alembic is not used
     yield
 
 
@@ -58,7 +58,7 @@ async def app_exception_handler(request: Request, exc: AppException):
     )
 
 
-# Middleware обрабатываются в обратном порядке
+# Middlewares are processed in reverse order
 # JWTRefreshMiddleware -> AuthenticationMiddleware -> SecurityMiddleware
 app.add_middleware(SecurityMiddleware)
 app.add_middleware(AuthenticationMiddleware)

@@ -5,15 +5,27 @@ from src.vacancies.infrastructure.elastic.mappings import VACANCY_MAPPING
 
 
 async def create_vacancy_index():
-    """Создаёт индекс 'vacancies'"""
+    """
+    Create the Elasticsearch index for storing vacancies.
+
+    Uses the predefined VACANCY_MAPPING and creates the index 'vacancies'.
+    If the index already exists, the operation will be ignored.
+
+    :return: Result of the Elasticsearch index creation.
+    """
     async with AsyncElasticsearch(settings.ELASTICSEARCH_HOSTS) as es:
-        # ignore=400 -> не создаст, если индекс уже есть
-        result = await es.indices.add(index="vacancies", body=VACANCY_MAPPING, ignore=400)
+        result = await es.indices.create(index="vacancies", body=VACANCY_MAPPING, ignore=400)
         return result
 
 
 async def delete_vacancy_index():
-    """Удаляет индекс 'vacancies'"""
+    """
+    Delete the Elasticsearch index 'vacancies'.
+
+    Useful for resetting the search database or during cleanup in test environments.
+
+    :return: Result of the Elasticsearch index deletion.
+    """
     async with AsyncElasticsearch(settings.ELASTICSEARCH_HOSTS) as es:
-        result = await es.indices.delete_by_pk(index="vacancies")
+        result = await es.indices.delete(index="vacancies")
         return result

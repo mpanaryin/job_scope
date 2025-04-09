@@ -8,33 +8,33 @@ from src.vacancies.domain.entities import VacancySource
 
 
 class VacancyReadDTO(CustomModel):
-    """Данные по вакансии"""
+    """DTO for reading vacancy data."""
     id: uuid.UUID
-    # Источник вакансии
+    # Source
     source_name: VacancySource
     source_id: int
     url: AnyUrl
-    # Название вакансии
+    # Name
     name: str
     description: str | None = None
-    # Зарплата
+    # Salary
     salary_from: int | None = None
     salary_to: int | None = None
     salary_currency: str | None = None
     salary_gross: bool | None = None
-    # Данные по работодателю
+    # Employer
     area_name: str | None = None
     employer_name: str | None = None
-    # Требования к вакансии
+    # Requirement
     employment: str | None = None
     experience: str | None = None
     schedule: str | None = None
     has_test: bool
-    # Дополнительная информация
+    # Additional
     is_archived: bool = False
     type: str | None = None
     meta: dict
-    # Даты
+    # Dates
     created_at: datetime.datetime | None = None
     published_at: datetime.datetime | None = None
     updated_at: datetime.datetime | None = None
@@ -55,32 +55,32 @@ class VacancyReadDTO(CustomModel):
 
 
 class VacancyCreateDTO(CustomModel):
-    """Данные по вакансии для создания"""
-    # Источник вакансии
+    """DTO for creating a vacancy."""
+    # Source
     source_name: VacancySource
     source_id: int
     url: AnyUrl
-    # Название вакансии
+    # Name
     name: str
     description: str | None = None
-    # Зарплата
+    # Salary
     salary_from: int | None = None
     salary_to: int | None = None
     salary_currency: str | None = None
     salary_gross: bool | None = None
-    # Данные по работодателю
+    # Employer
     area_name: str | None = None
     employer_name: str | None = None
-    # Требования к вакансии
+    # Requirement
     employment: str | None = None
     experience: str | None = None
     schedule: str | None = None
     has_test: bool
-    # Дополнительная информация
+    # Additional
     is_archived: bool = False
     type: str | None = None
     meta: dict
-    # Даты
+    # Dates
     created_at: datetime.datetime | None = None
     published_at: datetime.datetime | None = None
 
@@ -94,31 +94,31 @@ class VacancyCreateDTO(CustomModel):
 
 
 class VacancyUpdateDTO(CustomModel):
-    """Данные по вакансии для обновления"""
+    """DTO for updating a vacancy"""
     source_name: VacancySource | None = None
     source_id: int | None = None
     url: AnyUrl | None = None
-    # Название вакансии
+    # Name
     name: str | None = None
     description: str | None = None
-    # Зарплата
+    # Salary
     salary_from: int | None = None
     salary_to: int | None = None
     salary_currency: str | None = None
     salary_gross: bool | None = None
-    # Данные по работодателю
+    # Employer
     area_name: str | None = None
     employer_name: str | None = None
-    # Требования к вакансии
+    # Requirement
     employment: str | None = None
     experience: str | None = None
     schedule: str | None = None
     has_test: bool | None = None
-    # Дополнительная информация
+    # Additional
     is_archived: bool = False
     type: str | None = None
     meta: dict | None = None
-    # Даты
+    # Dates
     created_at: datetime.datetime | None = None
     published_at: datetime.datetime | None = None
 

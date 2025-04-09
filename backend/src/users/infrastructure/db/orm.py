@@ -5,6 +5,17 @@ from src.db.base import Base
 
 
 class UserDB(Base):
+    """
+    SQLAlchemy ORM model representing a user entity in the database.
+
+    Attributes:
+        id (int): Primary key identifier of the user.
+        email (str): Unique email address of the user.
+        hashed_password (str): Securely hashed password.
+        is_active (bool): Indicates whether the user account is active.
+        is_superuser (bool): Indicates whether the user has administrative privileges.
+        is_verified (bool): Indicates whether the user's email has been verified.
+    """
     __tablename__ = "users"
 
     id: Mapped[int] = mapped_column(primary_key=True)

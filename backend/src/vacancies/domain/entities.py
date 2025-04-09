@@ -81,7 +81,17 @@ class ProfessionalRole(CustomModel):
 
 
 class Vacancy(CustomModel):
-    # Источник вакансии
+    """
+    Domain model representing a job vacancy.
+
+    This model describes the essential fields typically associated with job postings,
+    aggregated from external sources (e.g., HeadHunter). It is used within the domain layer
+    to provide a unified structure for further processing, validation, or transformation
+    into DTOs or storage models.
+
+    While not all fields may be present for every source, the model aims to capture
+    the most relevant and meaningful data about a vacancy.
+    """
     source_id: str
     source_name: VacancySource
     accept_incomplete_resumes: bool | None = None
@@ -108,7 +118,7 @@ class Vacancy(CustomModel):
 
     @property
     def description(self) -> str | None:
-        """Вспомогательная функция для получения описания вакансии"""
+        """Vacancy description"""
         requirement = self.requirement or ''
         responsibility = self.responsibility or ''
         description = f"{requirement}\n\n{responsibility}".strip()

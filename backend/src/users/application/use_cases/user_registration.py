@@ -8,7 +8,16 @@ async def register_user(
     user_data: UserCreateDTO,
     uow: IUserUnitOfWork,
 ) -> User:
-    """Регистрация пользователя в системе"""
+    """
+    Register a new user in the system.
+
+    This function hashes the password, creates a new user entity,
+    saves it to the database, and commits the transaction.
+
+    :param user_data: Data transfer object containing user registration details.
+    :param uow: Unit of work instance for handling user repository operations.
+    :return: Newly created user object.
+    """
     user_data = UserCreate(
         **user_data.model_dump(mode='json'),
         hashed_password=hash_password(user_data.password)

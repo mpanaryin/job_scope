@@ -1,16 +1,30 @@
 import logging
+from typing import Annotated
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 
 from src.crud.router import CRUDRouter
 from src.vacancies.domain.dtos import VacancyCreateDTO, VacancyUpdateDTO, VacancyReadDTO
 from src.vacancies.domain.entities import VacancySearchQuery
 from src.vacancies.infrastructure.db.crud import VacancyService
-from src.vacancies.presentation.bootstrap import get_vacancy_search_repo
+from src.vacancies.presentation.dependencies import VacancySearchRepoDep
 
 logger = logging.getLogger(__name__)
 
 vacancy_api_router = APIRouter()
+
+
+@vacancy_api_router.get("/search")
+async def search(query: Annotated[VacancySearchQuery, Query()], search_repo: VacancySearchRepoDep):
+    """
+    Search for vacancies using full-text filters and parameters.
+
+    :param query: Search filters (area, employer, etc.).
+    :param search_repo: Elasticsearch-compatible repository.
+    :return: List of matched vacancies.
+    """
+    response = await search_repo.search(query)
+    return response["hits"]["hits"]
 
 
 class VacancyCRUDRouter(CRUDRouter):
@@ -19,11 +33,3 @@ class VacancyCRUDRouter(CRUDRouter):
     update_schema = VacancyUpdateDTO
     read_schema = VacancyReadDTO
     router = APIRouter()
-
-
-@vacancy_api_router.get("/search")
-async def search(query: VacancySearchQuery = Depends()):
-    logger.info("Search logss")
-    es_vacancy_repository = get_vacancy_search_repo()
-    response = await es_vacancy_repository.search(query)
-    return response["hits"]["hits"]

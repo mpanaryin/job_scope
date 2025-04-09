@@ -10,7 +10,7 @@ from src.vacancies.domain.entities import (
 
 
 class HHVacancyToDomainMapper:
-    """Маппер вакансии из HH в доменную модель"""
+    """Mapper for converting an HH vacancy to the domain model"""
 
     def map(self, vacancy: HHVacancy, source: VacancySource) -> Vacancy:
         return Vacancy(

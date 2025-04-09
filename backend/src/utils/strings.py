@@ -1,22 +1,33 @@
-import logging
 import random
 import string
 from typing import Optional
-
-logger = logging.getLogger(__name__)
 
 ALPHA_NUM = string.ascii_letters + string.digits
 
 
 def generate_random_alphanum(length: int = 20) -> str:
-    """Создание случайной последовательности символов, состоящей только из букв и цифр"""
+    """
+    Generate a random alphanumeric string.
+
+    This function returns a string of the specified length, consisting
+    only of uppercase/lowercase letters and digits.
+
+    :param length: Desired length of the generated string.
+    :return: Random alphanumeric string.
+    """
     return "".join(random.choices(ALPHA_NUM, k=length))
 
 
 def string_list_to_int_list(string_list: list | str | None) -> Optional[list[int]]:
     """
-    Преобразование списка строк в список целых чисел.
-    Специальная функция под запросы, где ID выводятся как список строк.
+    Convert a string or list of strings into a list of integers.
+
+    This function is useful when parsing query parameters like `?ids=1,2,3`,
+    which may come in as a string or a list of strings.
+
+    :param string_list: Input data in the form of a string, a list of strings,
+                        or None.
+    :return: A list of integers parsed from the input, or an empty list.
     """
     if not string_list or string_list == ['']:
         return []

@@ -12,21 +12,21 @@ async def collect_all_vacancies(
     search_repo: IVacancySearchRepository
 ) -> dict[str, BulkResult]:
     """
-    Сбор всех вакансий по search_params. Размер выборки в search_params не имеет значения,
-    будут получены все возможные вакансии в соответствие запросу.
-    :param search_params: Параметры поиска
-    :param client: API клиент соответствующего сервиса
-    :param uow: Unit of Work для работы с вакансиями
-    :param search_repo: Репозиторий документоориентированной базы данных для поиска
-    :return dict: Статистика по загруженным данным
+    Collect all vacancies from the external API and save them to both the database and search storage.
+    The batch size in search_params doesn't matter. All matching vacancies will be retrieved according to the query.
+
+    :param search_params: Search parameters to pass to the external API.
+    :param client: External API client implementing IVacancySourceClient.
+    :param uow: Unit of Work to manage transactional operations with the database.
+    :param search_repo: Search engine repository (e.g. Elasticsearch) implementing IVacancySearchRepository.
+    :return: Dictionary containing bulk operation results for database and search storage.
     """
     vacancies: list[TVacancy] = await client.get_all_vacancies(search_params)
     vacancies: list[Vacancy] = VacancyAPIToDomainMapper().map(vacancies)
-    # Добавление вакансий в базу
+
     db_result = await collect_vacancies_to_db(vacancies, uow)
-    # Добавление вакансий в ElasticSearch
     search_db_result = await collect_vacancies_to_search(vacancies, search_repo)
-    # Небольшая статистика по загруженным данным
+
     statistics = {
         "database": db_result,
         "search_db": search_db_result
@@ -41,20 +41,20 @@ async def collect_vacancies(
     search_repo: IVacancySearchRepository
 ) -> dict[str, BulkResult]:
     """
-    Сбор всех вакансий по search_params.
-    :param search_params: Параметры поиска
-    :param client: API клиент соответствующего сервиса
-    :param uow: Unit of Work для работы с вакансиями
-    :param search_repo: Репозиторий документоориентированной базы данных для поиска
-    :return dict: Статистика по загруженным данным
+    Collect vacancies from the external API and save them to both the database and search storage.
+
+    :param search_params: Search parameters to pass to the external API.
+    :param client: External API client implementing IVacancySourceClient.
+    :param uow: Unit of Work to manage transactional operations with the database.
+    :param search_repo: Search engine repository (e.g. Elasticsearch) implementing IVacancySearchRepository.
+    :return: Dictionary containing bulk operation results for database and search storage.
     """
     vacancies: list[TVacancy] = await client.get_vacancies(search_params)
     vacancies: list[Vacancy] = VacancyAPIToDomainMapper().map(vacancies)
-    # Добавление вакансий в базу
+
     db_result = await collect_vacancies_to_db(vacancies, uow)
-    # Добавление вакансий в ElasticSearch
     search_db_result = await collect_vacancies_to_search(vacancies, search_repo)
-    # Небольшая статистика по загруженным данным
+
     statistics = {
         "database": db_result,
         "search_db": search_db_result
@@ -64,10 +64,11 @@ async def collect_vacancies(
 
 async def collect_vacancies_to_db(vacancies: list[Vacancy], uow: IVacancyUnitOfWork) -> BulkResult:
     """
-    Добавление вакансий в базу данных
-    :param vacancies: Список вакансий
-    :param uow: Unit of Work для вакансий при работе с БД
-    :return int: Общее количество обработанных вакансий
+    Store vacancies in the relational database using the given Unit of Work.
+
+    :param vacancies: List of domain vacancy models to be saved.
+    :param uow: Unit of Work to manage the transactional context for database operations.
+    :return: Result of bulk insert/update operation.
     """
     async with uow:
         result = await uow.vacancies.bulk_add_or_update(vacancies)
@@ -80,10 +81,11 @@ async def collect_vacancies_to_search(
     search_repo: IVacancySearchRepository
 ) -> BulkResult:
     """
-    Добавляет вакансии в ElasticSearch или иное документоориентированное хранилище массово
-    :param vacancies: Список вакансий, полученных по API
-    :param search_repo: Репозиторий для ElasticSearch
-    :return: Общее количество обработанных и не обработанных вакансий
+    Store vacancies in the search database (e.g., Elasticsearch).
+
+    :param vacancies: List of domain vacancy models to be indexed.
+    :param search_repo: Repository for managing search engine operations.
+    :return: Result of bulk indexing operation.
     """
     result = await search_repo.bulk_add(vacancies)
     return result

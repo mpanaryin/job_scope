@@ -8,16 +8,42 @@ from src.vacancies.domain.interfaces import IVacancySearchRepository
 
 
 class ESVacancySearchRepository(IVacancySearchRepository):
-    """ElasticSearch Vacancy Search Repository"""
+    """
+    ElasticSearch implementation of the IVacancySearchRepository interface.
+
+    Provides full-text search and bulk insert capabilities for vacancies using Elasticsearch.
+
+    Attributes:
+        es_client: Async Elasticsearch client instance.
+    """
+
     def __init__(self):
+        """
+        Initialize the search repository with an Elasticsearch client.
+        """
         self.es_client = get_elastic_client()
 
     async def bulk_add(self, vacancies: list[Vacancy]) -> BulkResult:
+        """
+        Insert or update multiple vacancies in Elasticsearch.
+
+        :param vacancies: List of domain-level Vacancy models.
+        :return: BulkResult with counts of successful and failed operations.
+        """
         vacancies = VacancyDomainToElasticMapper().map(vacancies)
         success, failed = await helpers.async_bulk(self.es_client, vacancies)
         return BulkResult(success=success, failed=failed, total=len(vacancies))
 
     async def search(self, query: VacancySearchQuery):
+        """
+        Execute a search query in the 'vacancies' index.
+
+        Builds a bool query using provided filters such as area, employer, experience, employment type, schedule,
+        test requirement, archive status, and published date range.
+
+        :param query: Structured search query.
+        :return: Raw Elasticsearch response containing matched documents.
+        """
         must_clauses = []
 
         if query.query:

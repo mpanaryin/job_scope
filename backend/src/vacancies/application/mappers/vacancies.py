@@ -9,21 +9,40 @@ from src.vacancies.domain.dtos import VacancySource, VacancyCreateDTO
 
 class VacancyOriginalMapper:
     """
-    Преобразует dict в оригинальный тип вакансии
-    Например, может использоваться для преобразования meta данных вакансий
+    Maps raw dictionary data to typed external API vacancy models.
+
+    Attributes:
+        source (VacancySource): The source of the external vacancy data (e.g., HeadHunter).
     """
 
     def __init__(self, source: VacancySource):
         self.source = source
 
     def map(self, vacancies: list[dict]) -> list[TVacancy]:
+        """
+        Convert a list of raw vacancy dictionaries into typed TVacancy models.
+
+        :param vacancies: List of vacancy dictionaries.
+        :return: List of TVacancy instances.
+        """
         return [self._map_vacancy_to_original(vacancy) for vacancy in vacancies]
 
     def map_one(self, vacancy: dict) -> TVacancy:
+        """
+        Convert a single vacancy dictionary into a typed TVacancy model.
+
+        :param vacancy: Vacancy dictionary.
+        :return: TVacancy instance.
+        """
         return self._map_vacancy_to_original(vacancy)
 
     def _map_vacancy_to_original(self, vacancy: dict) -> TVacancy:
-        """Преобразует dict формат вакансии в оригинальный её тип"""
+        """
+        Internal mapping of a dictionary to a TVacancy model.
+
+        :param vacancy: Raw dictionary.
+        :return: Parsed TVacancy model.
+        """
         if isinstance(vacancy, dict):
             if self.source == VacancySource.HEADHUNTER:
                 return HHVacancy.model_validate(vacancy)
@@ -31,22 +50,43 @@ class VacancyOriginalMapper:
 
 
 class VacancyAPIToDomainMapper:
-    """Преобразует TVacancy или ей подобный dict к доменной модели"""
+    """
+    Maps API-level vacancy data to internal domain models.
+
+    Attributes:
+        source (VacancySource | None): Optional explicit source type.
+    """
 
     def __init__(self, vacancy_source: VacancySource | None = None):
         self.source = vacancy_source
 
     def map(self, vacancies: list[TVacancy | dict]) -> list[Vacancy]:
-        """Маппинг списка TVacancy к списку VacancyCreate"""
+        """
+        Convert a list of external vacancies (TVacancy or raw dicts) to domain models.
+
+        :param vacancies: List of external vacancy representations.
+        :return: List of domain vacancy models.
+        """
         self.source = self._set_vacancy_source(vacancies, self.source)
         return [self._map_vacancy_to_domain(vacancy) for vacancy in vacancies]
 
     def map_one(self, vacancy: TVacancy | dict) -> Vacancy:
+        """
+        Convert a single external vacancy to a domain model.
+
+        :param vacancy: TVacancy or raw dictionary.
+        :return: Domain Vacancy instance.
+        """
         self.source = self._set_vacancy_source([vacancy], self.source)
         return self._map_vacancy_to_domain(vacancy)
 
     def _map_vacancy_to_domain(self, vacancy: TVacancy | dict) -> Vacancy:
-        """Маппинг TVacancy (ответ от внешнего API) к VacancyCreate (схема для создания в БД)"""
+        """
+        Internal mapping from TVacancy to Vacancy.
+
+        :param vacancy: TVacancy or dict.
+        :return: Mapped Vacancy.
+        """
         if isinstance(vacancy, dict):
             vacancy = VacancyOriginalMapper(self.source).map_one(vacancy)
 
@@ -54,7 +94,13 @@ class VacancyAPIToDomainMapper:
             return HHVacancyToDomainMapper().map(vacancy, self.source)
 
     def _set_vacancy_source(self, vacancies: list[TVacancy], source: VacancySource | None):
-        """Устанавливаем источник вакансий"""
+        """
+        Determine or validate the vacancy source.
+
+        :param vacancies: Input vacancy data.
+        :param source: Optional pre-defined source.
+        :return: Finalized source.
+        """
         if source:
             return source
 
@@ -66,15 +112,34 @@ class VacancyAPIToDomainMapper:
 
 
 class VacancyDomainToDTOMapper:
-    """Преобразует доменную модель к модели базы данных"""
+    """
+    Maps internal domain models to DTOs for database persistence.
+    """
     def map(self, vacancies: list[Vacancy]) -> list[VacancyCreateDTO]:
-        """Маппинг списка TVacancy к списку VacancyCreate"""
+        """
+        Convert domain vacancies to database-ready DTOs.
+
+        :param vacancies: List of domain model vacancies.
+        :return: List of DTOs ready for storage.
+        """
         return [self._map_domain_vacancy_to_db_schema(vacancy) for vacancy in vacancies]
 
     def map_one(self, vacancy: Vacancy) -> VacancyCreateDTO:
+        """
+        Convert a single domain vacancy to DTO.
+
+        :param vacancy: Domain vacancy.
+        :return: VacancyCreateDTO.
+        """
         return self._map_domain_vacancy_to_db_schema(vacancy)
 
     def _map_domain_vacancy_to_db_schema(self, vacancy: Vacancy) -> VacancyCreateDTO:
+        """
+        Internal mapping to DB DTO.
+
+        :param vacancy: Domain model.
+        :return: DTO for DB insertion.
+        """
         return VacancyCreateDTO(
             source_name=vacancy.source_name,
             source_id=int(vacancy.source_id),
@@ -100,14 +165,26 @@ class VacancyDomainToDTOMapper:
 
 
 class VacancyDomainToElasticMapper:
-    """Преобразует доменную модель к модели elastic search"""
+    """
+    Maps internal domain vacancy models to Elasticsearch-compatible document structures.
+    """
 
     def map(self, vacancies: list[Vacancy]) -> list[dict]:
-        """Маппинг списка вакансий к формату документа поисковой базы данных"""
+        """
+        Convert domain vacancies to Elasticsearch documents.
+
+        :param vacancies: List of domain model vacancies.
+        :return: List of documents with metadata for bulk indexing.
+        """
         return [self.map_one(vacancy) for vacancy in vacancies]
 
     def map_one(self, vacancy: Vacancy) -> dict:
-        """Маппинг вакансии к формату документа поисковой базы данных"""
+        """
+        Convert a single domain vacancy to Elasticsearch document format.
+
+        :param vacancy: Domain model vacancy.
+        :return: Elasticsearch-compatible document.
+        """
         doc = self._map_vacancy_to_document(vacancy)
         return {
             "_op_type": "index",
@@ -117,7 +194,12 @@ class VacancyDomainToElasticMapper:
         }
 
     def _map_vacancy_to_document(self, vacancy: Vacancy) -> dict:
-        """Маппинг вакансии к формату документа поисковой базы данных"""
+        """
+        Convert domain vacancy to document body for Elasticsearch.
+
+        :param vacancy: Domain model.
+        :return: Mapped document dictionary.
+        """
         return {
             "id": f"{vacancy.source_name}{vacancy.source_id}",
             "source": {

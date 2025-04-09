@@ -6,15 +6,21 @@ from starlette.responses import Response
 
 from src.auth.config import auth_config
 from src.auth.domain.entities import TokenType
+from src.auth.domain.interfaces import ITokenStorage
 from src.auth.infrastructure.services.jwt import JWTAuth, JWTProvider
 from src.auth.infrastructure.services.redis_token_storage import RedisTokenStorage
 from src.auth.infrastructure.transport.cookie import CookieTransport
 from src.auth.infrastructure.transport.header import HeaderTransport
 
 
-def get_redis_token_storage() -> RedisTokenStorage:
+def get_token_storage() -> ITokenStorage:
     """
-    Dependency for obtaining the Redis-based token storage.
+    Dependency that provides an instance of ITokenStorage.
+    It is used to persist and validate issued JWT tokens.
+
+    This allows the presentation layer to remain decoupled from the actual implementation.
+    By default, it returns a Redis-backed token storage (RedisTokenStorage), but the implementation
+    can be easily overridden for testing or different environments.
 
     :return: Instance of RedisTokenStorage used to persist and manage tokens.
     """
@@ -54,6 +60,8 @@ async def get_jwt_auth(request: Request = None, response: Response = None) -> JW
         TokenType.REFRESH: refresh_transports
     }
 
-    return JWTAuth(jwt_provider, transports, get_redis_token_storage(), request=request, response=response)
+    return JWTAuth(jwt_provider, transports, get_token_storage(), request=request, response=response)
+
 
 JWTAuthDep = Annotated[JWTAuth, Depends(get_jwt_auth)]
+TokenStorageDep = Annotated[ITokenStorage, Depends(get_token_storage)]
