@@ -82,6 +82,5 @@ class ESVacancySearchRepository(IVacancySearchRepository):
 
         if query.sort_by:
             body["sort"] = [{query.sort_by: {"order": query.sort_order}}]
-
         response = await self.es_client.search(index="vacancies", body=body)
         return response

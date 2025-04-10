@@ -1,7 +1,7 @@
 import logging
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Query
 
 from src.crud.router import CRUDRouter
 from src.vacancies.domain.dtos import VacancyCreateDTO, VacancyUpdateDTO, VacancyReadDTO
@@ -18,10 +18,6 @@ vacancy_api_router = APIRouter()
 async def search(query: Annotated[VacancySearchQuery, Query()], search_repo: VacancySearchRepoDep):
     """
     Search for vacancies using full-text filters and parameters.
-
-    :param query: Search filters (area, employer, etc.).
-    :param search_repo: Elasticsearch-compatible repository.
-    :return: List of matched vacancies.
     """
     response = await search_repo.search(query)
     return response["hits"]["hits"]

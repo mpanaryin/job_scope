@@ -28,23 +28,18 @@ logger = logging.getLogger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    await create_db_and_tables()  # Only needed if Alembic is not used
-    yield
-
-
-async def on_startup():
+    # on startup
     AiohttpClient.get_aiohttp_client()
-
-
-async def on_shutdown():
+    # await create_db_and_tables()  # Only needed if Alembic is not used
+    yield
+    # on shutdown
     await AiohttpClient.close_aiohttp_client()
 
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
-    on_startup=[on_startup],
-    on_shutdown=[on_shutdown]
-)  # lifespan если нет alembic
+    lifespan=lifespan
+)
 
 
 @app.exception_handler(AppException)
@@ -68,7 +63,7 @@ Instrumentator().instrument(app).expose(app, endpoint='/__internal_metrics__')
 
 app.mount("/static", StaticFiles(directory="/static"), name="static")
 
-app.include_router(auth_api_router, prefix='/api', tags=["auth"])
+app.include_router(auth_api_router, prefix='/api/auth', tags=["auth"])
 app.include_router(auth_view_router, prefix='/auth', tags=["auth"])
 app.include_router(user_api_router, prefix='/api/users', tags=["users"])
 app.include_router(UserCRUDRouter().get_router(), prefix='/api/crud-users', tags=["crud-users"])

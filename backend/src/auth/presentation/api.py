@@ -15,11 +15,6 @@ auth_api_router = APIRouter()
 async def login(credentials: AuthUserDTO, auth: JWTAuthDep, uow: UserUoWDep):
     """
     Authenticate user and issue JWT tokens.
-
-    :param credentials: User email and password.
-    :param auth: Authentication service dependency.
-    :param uow: User unit of work for managing transaction.
-    :return: Success message
     """
     await authenticate(credentials, uow, auth)
     return {"msg": "Tokens set"}
@@ -29,9 +24,6 @@ async def login(credentials: AuthUserDTO, auth: JWTAuthDep, uow: UserUoWDep):
 async def logout(auth: JWTAuthDep):
     """
     Log out the current user and revoke all active tokens.
-
-    :param auth: Authentication service dependency.
-    :return: Success message
     """
     await auth.unset_tokens()
     return {"msg": "Tokens deleted"}
@@ -41,9 +33,6 @@ async def logout(auth: JWTAuthDep):
 async def refresh(auth: JWTAuthDep):
     """
     Refresh the access token using a valid refresh token.
-
-    :param auth: Authentication service dependency.
-    :return: Success message
     """
     await auth.refresh_access_token()
     return {"msg": "The token has been refresh"}
@@ -53,10 +42,6 @@ async def refresh(auth: JWTAuthDep):
 async def revoke_tokens(user_id: str, token_storage: TokenStorageDep):
     """
     Revoke all tokens for a specific user by ID (admin action).
-
-    :param user_id: The ID of the user whose tokens should be revoked.
-    :param token_storage: Token storage service.
-    :return: Success message with user ID.
     """
     await token_storage.revoke_tokens_by_user(user_id)
     return {"msg": f"Tokens revoked for user {user_id}"}
@@ -67,8 +52,5 @@ async def revoke_tokens(user_id: str, token_storage: TokenStorageDep):
 async def get_my_account(request: Request) -> UserReadDTO:
     """
     Retrieve the profile of the currently authenticated user.
-
-    :param request: Current request object.
-    :return: Authenticated user's data.
     """
     return request.state.user

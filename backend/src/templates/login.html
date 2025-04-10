@@ -32,7 +32,7 @@
     $(document).ready(function () {
         $(document).off('click', '#login-btn').on('click', '#login-btn', function (e) {
             $.ajax({
-                url: "/api/users/login",
+                url: "/api/auth/login",
                 data: JSON.stringify({
                     email: $('#email').val(),
                     password: $('#password').val()

@@ -2,7 +2,7 @@ import os
 import secrets
 from typing import Any, Literal
 
-from pydantic import AnyHttpUrl, EmailStr, PostgresDsn, field_validator, ValidationInfo, AnyUrl
+from pydantic import AnyHttpUrl, EmailStr, PostgresDsn, field_validator, ValidationInfo, AnyUrl, ConfigDict
 from pydantic_settings import BaseSettings
 
 
@@ -100,8 +100,7 @@ class Settings(BaseSettings):
 
     EMAIL_TEST_USER: EmailStr = "mytest@example.com"  # type: ignore
 
-    class Config:
-        case_sensitive = True
+    model_config = ConfigDict()
 
 
 settings = Settings()

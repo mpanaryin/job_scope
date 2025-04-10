@@ -1,7 +1,7 @@
 import datetime
 import uuid
 
-from pydantic import AnyUrl, field_serializer
+from pydantic import AnyUrl, field_serializer, ConfigDict
 
 from src.core.domain.entities import CustomModel
 from src.vacancies.domain.entities import VacancySource
@@ -50,8 +50,7 @@ class VacancyReadDTO(CustomModel):
     def convert_source_name(self, v):
         return v.value
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class VacancyCreateDTO(CustomModel):

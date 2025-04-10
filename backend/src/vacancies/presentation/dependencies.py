@@ -1,5 +1,7 @@
 from typing import Annotated
 
+from fastapi import Depends
+
 from src.integrations.infrastructure.headhunter.client import HeadHunterClient
 from src.vacancies.domain.interfaces import IVacancySearchRepository, IVacancyUnitOfWork
 from src.vacancies.infrastructure.db.unit_of_work import PGVacancyUnitOfWork
@@ -40,4 +42,4 @@ def get_headhunter_client() -> HeadHunterClient:
     return HeadHunterClient()
 
 
-VacancySearchRepoDep = Annotated[IVacancySearchRepository, get_vacancy_search_repo]
+VacancySearchRepoDep = Annotated[IVacancySearchRepository, Depends(get_vacancy_search_repo)]

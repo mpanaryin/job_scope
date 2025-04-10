@@ -16,10 +16,6 @@ user_api_router = APIRouter()
 async def register(user_data: UserCreateDTO, uow: UserUoWDep):
     """
     Register a new user.
-
-    :param user_data: Data required to create a new user.
-    :param uow: User unit of work for managing transaction.
-    :return: Created user data.
     """
     return await register_user(user_data, uow=uow)
 
@@ -28,10 +24,6 @@ async def register(user_data: UserCreateDTO, uow: UserUoWDep):
 async def get_profile(user_id: int, uow: UserUoWDep):
     """
     Get user profile by ID.
-
-    :param user_id: User's primary key.
-    :param uow: User unit of work for managing transaction.
-    :return: Retrieved user data.
     """
     return await get_user_profile(user_id, uow=uow)
 
@@ -40,11 +32,6 @@ async def get_profile(user_id: int, uow: UserUoWDep):
 async def update(user_id: int, user_data: UserUpdateDTO, uow: UserUoWDep):
     """
     Update user data.
-
-    :param user_id: User's primary key.
-    :param user_data: Fields to update.
-    :param uow: User unit of work for managing transaction.
-    :return: Updated user data.
     """
     return await update_user(user_id, user_data, uow=uow)
 
@@ -53,9 +40,6 @@ async def update(user_id: int, user_data: UserUpdateDTO, uow: UserUoWDep):
 async def delete(user_id: int, uow: UserUoWDep):
     """
     Delete user by ID.
-
-    :param user_id: User's primary key.
-    :param uow: User unit of work for managing transaction.
     """
     return await delete_user(user_id, uow=uow)
 
