@@ -19,3 +19,6 @@ prometheus-fastapi-instrumentator==7.1.0
 celery==5.5.0
 redis==5.2.1
 asgiref==3.8.1
+pytest==8.3.5
+pytest-asyncio==0.26.0
+httpx==0.28.1
