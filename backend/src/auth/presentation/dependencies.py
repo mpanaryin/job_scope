@@ -6,7 +6,7 @@ from starlette.responses import Response
 
 from src.auth.config import auth_config
 from src.auth.domain.entities import TokenType
-from src.auth.domain.interfaces import ITokenStorage
+from src.auth.domain.interfaces import ITokenStorage, ITokenAuth
 from src.auth.infrastructure.services.jwt import JWTAuth, JWTProvider
 from src.auth.infrastructure.services.redis_token_storage import RedisTokenStorage
 from src.auth.infrastructure.transport.cookie import CookieTransport
@@ -27,7 +27,7 @@ def get_token_storage() -> ITokenStorage:
     return RedisTokenStorage()
 
 
-async def get_jwt_auth(request: Request = None, response: Response = None) -> JWTAuth:
+async def get_token_auth(request: Request = None, response: Response = None) -> JWTAuth:
     """
     Dependency for providing a configured JWTAuth service.
 
@@ -63,5 +63,5 @@ async def get_jwt_auth(request: Request = None, response: Response = None) -> JW
     return JWTAuth(jwt_provider, transports, get_token_storage(), request=request, response=response)
 
 
-JWTAuthDep = Annotated[JWTAuth, Depends(get_jwt_auth)]
+TokenAuthDep = Annotated[ITokenAuth, Depends(get_token_auth)]
 TokenStorageDep = Annotated[ITokenStorage, Depends(get_token_storage)]

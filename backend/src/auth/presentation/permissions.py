@@ -13,6 +13,9 @@ class access_control:  # noqa
     """
     Decorator for access control on FastAPI endpoints.
 
+    Important: the decorated endpoint must explicitly include
+    `request: Request` or `auth: TokenAuthDep` in its parameters.
+
     Supports checks for:
     - Superuser-only access.
     - Open access (for anonymous users).
@@ -64,10 +67,9 @@ class access_control:  # noqa
         Extract the user from the request state and store it in `cls.current_user`.
         If no user is found, use AnonymousUser as default.
         """
-        try:
-            self.current_user = kwargs['request'].state.user
-        except (AttributeError, KeyError):
-            self.current_user = AnonymousUser()
+        request = getattr(kwargs.get("auth"), "request", None) or kwargs.get("request")
+        user = getattr(request, "state", None) and getattr(request.state, "user", None)
+        self.current_user = user if user is not None else AnonymousUser()
         return None
 
     async def verify_request(self, *args, **kwargs) -> bool:

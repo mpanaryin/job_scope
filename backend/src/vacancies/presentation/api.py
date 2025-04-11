@@ -3,6 +3,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Query
 
+from src.auth.presentation.dependencies import TokenAuthDep
 from src.crud.router import CRUDRouter
 from src.vacancies.domain.dtos import VacancyCreateDTO, VacancyUpdateDTO, VacancyReadDTO
 from src.vacancies.domain.entities import VacancySearchQuery
@@ -15,7 +16,7 @@ vacancy_api_router = APIRouter()
 
 
 @vacancy_api_router.get("/search")
-async def search(query: Annotated[VacancySearchQuery, Query()], search_repo: VacancySearchRepoDep):
+async def search(query: Annotated[VacancySearchQuery, Query()], search_repo: VacancySearchRepoDep, auth: TokenAuthDep):
     """
     Search for vacancies using full-text filters and parameters.
     """

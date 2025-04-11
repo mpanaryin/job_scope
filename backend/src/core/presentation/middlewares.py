@@ -4,7 +4,7 @@ from starlette.responses import JSONResponse
 
 from src.auth.domain.entities import AnonymousUser, TokenType
 from src.auth.domain.exceptions import RefreshTokenNotValid
-from src.auth.presentation.dependencies import get_jwt_auth
+from src.auth.presentation.dependencies import get_token_auth
 from src.users.infrastructure.db.unit_of_work import PGUserUnitOfWork
 
 
@@ -17,7 +17,7 @@ class JWTRefreshMiddleware(BaseHTTPMiddleware):
     """
 
     async def dispatch(self, request: Request, call_next):
-        pre_auth = await get_jwt_auth(request=request)
+        pre_auth = await get_token_auth(request=request)
         access_data = await pre_auth.read_token(TokenType.ACCESS)
         if access_data is None:
             try:
@@ -27,7 +27,7 @@ class JWTRefreshMiddleware(BaseHTTPMiddleware):
                 ...
         response = await call_next(request)
         # Ensure refresh token is still valid before updating response with new access
-        post_auth = await get_jwt_auth(request=request, response=response)
+        post_auth = await get_token_auth(request=request, response=response)
         refresh_data = await post_auth.read_token(TokenType.REFRESH)
 
         if refresh_data:
@@ -47,7 +47,7 @@ class AuthenticationMiddleware(BaseHTTPMiddleware):
         super().__init__(app)
 
     async def dispatch(self, request: Request, call_next):
-        jwt_auth = await get_jwt_auth(request=request)
+        jwt_auth = await get_token_auth(request=request)
         token_data = await jwt_auth.read_token(TokenType.ACCESS)
         if not token_data:
             request.state.user = AnonymousUser()

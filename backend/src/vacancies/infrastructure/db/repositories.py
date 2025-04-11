@@ -90,4 +90,5 @@ class PGVacancyRepository(IVacancyRepository):
         return BulkResult(
             success=created + updated,
             failed=total - (created + updated),
+            total=total
         )
