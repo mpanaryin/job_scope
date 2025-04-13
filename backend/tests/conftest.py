@@ -10,3 +10,4 @@ from src.main import app
 async def client() -> AsyncIterator[httpx.AsyncClient]:
     async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url='http://testserver') as client:
         yield client
+        

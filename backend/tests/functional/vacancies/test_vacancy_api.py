@@ -1,14 +1,9 @@
-from unittest.mock import MagicMock, AsyncMock
-
 import httpx
 import pytest
 
-from src.auth.presentation.dependencies import get_token_auth
-from src.core.presentation.middlewares import SecurityMiddleware
 from src.main import app
-from src.users.domain.entities import User
 from src.vacancies.presentation.dependencies import get_vacancy_search_repo
-from tests.vacancies.fakes import FakeSearchVacancyRepository
+from tests.fakes.vacancies import FakeSearchVacancyRepository
 
 
 @pytest.mark.asyncio
@@ -25,7 +20,6 @@ async def test_search_vacancies(monkeypatch, client: httpx.AsyncClient):
         response = await client.get(f"/api/vacancies/search", params={
             "query": "python"
         })
-        print(response.json())
         assert response.status_code == 200
     finally:
         app.dependency_overrides = {}

@@ -11,7 +11,7 @@ FULLY_EXCLUDED = {
     '.pytest_cache',
     '.vscode',
     '.DS_Store',
-    '.env',
+    '.env.dev',
     'celerybeat-schedule',
     'celerybeat-schedule-shm',
     'celerybeat-schedule-wal',

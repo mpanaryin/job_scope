@@ -5,7 +5,7 @@ from src.vacancies.application.mappers.vacancies import VacancyAPIToDomainMapper
 from src.vacancies.application.use_cases.vacancy_collector import collect_all_vacancies
 from src.vacancies.domain.entities import Vacancy, VacancySource
 from src.core.domain.entities import BulkResult
-from tests.vacancies.fakes import FakeVacancyUnitOfWork, FakeSearchVacancyRepository
+from tests.fakes.vacancies import FakeVacancyUnitOfWork, FakeSearchVacancyRepository
 
 
 @pytest.mark.asyncio

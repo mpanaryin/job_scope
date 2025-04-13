@@ -68,8 +68,8 @@ class JWTProvider(ITokenProvider):
         if lifetime_seconds:
             expire = get_timezone_now() + timedelta(seconds=lifetime_seconds)
             payload["exp"] = expire
-        payload.setdefault("jti", str(uuid6.uuid6()))  # JWT ID
-        payload.setdefault("iss", auth_config.JWT_ISSUER)
+        payload["jti"] = str(uuid6.uuid6())  # JWT ID
+        payload["iss"] = auth_config.JWT_ISSUER
         return jwt.encode(payload, self._get_secret_value(secret), algorithm=algorithm)
 
     def read_token(self, token: str | None) -> TokenData | None:
@@ -220,8 +220,9 @@ class JWTAuth(ITokenAuth):
         refresh_token_data = await self.read_token(TokenType.REFRESH)
         if not refresh_token_data:
             raise RefreshTokenNotValid()
-
-        access_token = self.token_provider.create_access_token(refresh_token_data.dict())
+        access_token = self.token_provider.create_access_token(
+            refresh_token_data.model_dump(include={"user_id", "is_superuser"})
+        )
         self.request.state.access_token = access_token
 
         # Since we have auto-update via middleware, this is extra work.

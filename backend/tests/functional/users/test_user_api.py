@@ -3,7 +3,7 @@ import pytest
 
 from src.main import app
 from src.users.presentation.dependencies import get_user_uow
-from tests.users.fakes import FakeUserUnitOfWork
+from tests.fakes.users import FakeUserUnitOfWork
 
 
 @pytest.mark.asyncio

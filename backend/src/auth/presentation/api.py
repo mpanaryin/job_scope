@@ -6,7 +6,7 @@ from starlette.requests import Request
 from src.auth.application.use_cases.authentication import authenticate
 from src.auth.presentation.dependencies import TokenAuthDep
 from src.auth.presentation.permissions import access_control
-from src.auth.domain.dtos import AuthUserDTO, RevokeTokensDTO
+from src.auth.domain.dtos import AuthUserDTO
 from src.users.domain.dtos import UserReadDTO
 from src.users.presentation.dependencies import UserUoWDep
 

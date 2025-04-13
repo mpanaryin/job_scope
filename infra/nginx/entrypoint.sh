@@ -1,11 +1,13 @@
 #!/bin/sh
 set -e
 
-# Если DEBUG не задан, считаем, что это production-режим
-: ${DEBUG:=false}
+# Если ENVIRONMENT не задан, считаем, что это production-режим
+: "${ENVIRONMENT:=production}"
 
-if [ "$DEBUG" = "false" ]; then
+if [ "$ENVIRONMENT" = "production" ]; then
     cp /etc/nginx/nginx.prod.conf.template /etc/nginx/nginx.conf
+elif [ "$ENVIRONMENT" = "testing" ]; then
+    cp /etc/nginx/nginx.test.conf.template /etc/nginx/nginx.conf
 else
     cp /etc/nginx/nginx.dev.conf.template /etc/nginx/nginx.conf
 fi

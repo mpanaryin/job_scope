@@ -1,6 +1,6 @@
 import pytest
 
-from tests.users.fakes import FakeUserUnitOfWork
+from tests.fakes.users import FakeUserUnitOfWork
 
 
 @pytest.fixture

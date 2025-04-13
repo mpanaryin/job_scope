@@ -5,7 +5,7 @@ import pytest
 from src.auth.application.use_cases.authentication import authenticate
 from src.auth.domain.dtos import AuthUserDTO
 from src.users.domain.entities import UserCreate
-from tests.users.fakes import FakeUserUnitOfWork
+from tests.fakes.users import FakeUserUnitOfWork
 
 
 @pytest.mark.asyncio

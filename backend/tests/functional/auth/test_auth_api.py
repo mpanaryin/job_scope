@@ -7,7 +7,7 @@ from src.main import app
 from src.auth.presentation.dependencies import get_token_auth
 from src.users.domain.entities import UserCreate, User
 from src.users.presentation.dependencies import get_user_uow
-from tests.users.fakes import FakeUserUnitOfWork
+from tests.fakes.users import FakeUserUnitOfWork
 
 
 @pytest.mark.asyncio
