@@ -39,3 +39,11 @@ class AnonymousUser(CustomModel):
     is_active: bool = True
     is_superuser: bool = False
     is_verified: bool = False
+
+    def __bool__(self) -> bool:
+        """
+        Usage:
+        if not user:
+            `some actions`
+        """
+        return False

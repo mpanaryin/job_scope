@@ -220,15 +220,22 @@ class JWTAuth(ITokenAuth):
         refresh_token_data = await self.read_token(TokenType.REFRESH)
         if not refresh_token_data:
             raise RefreshTokenNotValid()
+
         access_token = self.token_provider.create_access_token(
             refresh_token_data.model_dump(include={"user_id", "is_superuser"})
         )
+
+        # Optimized self.set_token functionality for use via API/middleware
         self.request.state.access_token = access_token
+
+        if self.token_storage:
+            await self.token_storage.store_token(self.token_provider.read_token(access_token))
 
         # Since we have auto-update via middleware, this is extra work.
         # It is only useful when updating directly via the endpoint
         if self.response:
-            await self.set_token(access_token, TokenType.ACCESS)
+            for transport in self._get_transports(TokenType.ACCESS):
+                transport.set_token(self.response, access_token)
 
     async def read_token(self, token_type: TokenType) -> TokenData | None:
         """
@@ -237,7 +244,7 @@ class JWTAuth(ITokenAuth):
         :param token_type: Type of token (access or refresh).
         :return: TokenData if valid and active, else None.
         """
-        token = self._get_access_token() if TokenType.ACCESS else self._get_refresh_token()
+        token = self._get_access_token() if token_type == TokenType.ACCESS else self._get_refresh_token()
         token_data = self.token_provider.read_token(token)
         return await self._validate_token_or_none(token_data)
 
@@ -255,7 +262,6 @@ class JWTAuth(ITokenAuth):
             is_active = await self.token_storage.is_token_active(token_data.jti)
             if not is_active:
                 return None
-
         return token_data
 
     def _get_access_token(self) -> str | None:

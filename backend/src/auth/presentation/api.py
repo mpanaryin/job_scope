@@ -1,9 +1,9 @@
 from typing import Annotated
 
 from fastapi import APIRouter, Body
-from starlette.requests import Request
 
 from src.auth.application.use_cases.authentication import authenticate
+from src.auth.domain.entities import TokenType
 from src.auth.presentation.dependencies import TokenAuthDep
 from src.auth.presentation.permissions import access_control
 from src.auth.domain.dtos import AuthUserDTO
@@ -52,8 +52,8 @@ async def revoke_tokens(user_id: Annotated[int, Body(embed=True)], auth: TokenAu
 
 @auth_api_router.get("/me")
 @access_control(open=True)
-async def get_my_account(request: Request) -> UserReadDTO:
+async def get_me(auth: TokenAuthDep) -> UserReadDTO:
     """
     Retrieve the profile of the currently authenticated user.
     """
-    return request.state.user
+    return auth.request.state.user

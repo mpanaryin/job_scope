@@ -29,7 +29,6 @@ class RedisTokenStorage(ITokenStorage):
 
         # Add token JTI to the user's token set
         await self.redis.sadd(f"user_tokens:{token_data.user_id}", token_data.jti)
-        await self.redis.expire(f"user_tokens:{token_data.user_id}", ttl)
 
     async def revoke_tokens_by_user(self, user_id: str) -> None:
         """

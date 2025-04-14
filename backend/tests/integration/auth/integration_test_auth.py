@@ -12,20 +12,17 @@ new_user = UserCreateDTO(
 new_superuser = UserCreateDTO(
     email="new_superuser@email.com",
     password="Securepassword!2",
-    is_active=True, is_verified=True, is_superuser=False
+    is_active=True, is_verified=True, is_superuser=True
 )
 
 
 @pytest.mark.asyncio(loop_scope="session")
 async def test_login_and_logout(clear_db, user_factory):
     async with httpx.AsyncClient(base_url="http://localhost:8000") as client:
-        user = await user_factory(client=client, user=new_user)
-        assert user["email"] == new_user.email
+        await user_factory(client=client, user=new_user)
 
         login_data = {"email": new_user.email, "password": new_user.password}
-        response = await client.post("/api/auth/login", json=login_data)
-        assert response.status_code == 200
-        assert response.json() == {"detail": "Tokens set"}
+        await _login_and_set_cookies(client, login_data)
 
         response = await client.post("/api/auth/logout")
         assert response.status_code == 200
@@ -35,8 +32,7 @@ async def test_login_and_logout(clear_db, user_factory):
 @pytest.mark.asyncio(loop_scope="session")
 async def test_login_invalid_password(clear_db, user_factory):
     async with httpx.AsyncClient(base_url="http://localhost:8000") as client:
-        user = await user_factory(client=client, user=new_user)
-        assert user["email"] == new_user.email
+        await user_factory(client=client, user=new_user)
 
         login_data = {"email": new_user.email, "password": 'pwd_with_error'}
         response = await client.post("/api/auth/login", json=login_data)
@@ -55,19 +51,48 @@ async def test_logout(clear_db, user_factory):
 @pytest.mark.asyncio(loop_scope="session")
 async def test_login_and_refresh(clear_db, user_factory):
     async with httpx.AsyncClient(base_url="http://localhost:8000") as client:
-        user = await user_factory(client=client, user=new_user)
-        assert user["email"] == new_user.email
+        await user_factory(client=client, user=new_user)
 
         login_data = {"email": new_user.email, "password": new_user.password}
-        response = await client.post("/api/auth/login", json=login_data)
-        assert response.status_code == 200
-        assert response.json() == {"detail": "Tokens set"}
-
-        access_token = response.cookies.get("access_token")
-        refresh_token = response.cookies.get("refresh_token")
-        client.cookies.set("access_token", access_token)
-        client.cookies.set("refresh_token", refresh_token)
+        await _login_and_set_cookies(client, login_data)
 
         response = await client.post("/api/auth/refresh")
         assert response.status_code == 200
         assert response.json() == {"detail": "The token has been refresh"}
+
+
+@pytest.mark.asyncio(loop_scope="session")
+async def test_revoke_by_ordinary_user(clear_db, user_factory):
+    async with httpx.AsyncClient(base_url="http://localhost:8000") as client:
+        user = await user_factory(client=client, user=new_user)
+
+        login_data = {"email": new_user.email, "password": new_user.password}
+        await _login_and_set_cookies(client, login_data)
+
+        response = await client.post("/api/auth/revoke", json={"user_id": user["id"]})
+        assert response.status_code == 403
+        assert response.json() == {"detail": f"Permission denied"}
+
+
+@pytest.mark.asyncio(loop_scope="session")
+async def test_revoke_by_superuser(clear_db, user_factory):
+    async with httpx.AsyncClient(base_url="http://localhost:8000") as client:
+        user = await user_factory(client=client, user=new_superuser)
+        assert user["email"] == new_superuser.email
+
+        login_data = {"email": new_superuser.email, "password": new_superuser.password}
+        await _login_and_set_cookies(client, login_data)
+
+        response = await client.post("/api/auth/revoke", json={"user_id": user["id"]})
+        assert response.status_code == 200
+        assert response.json() == {"detail": f"Tokens revoked for user {user['id']}"}
+
+
+async def _login_and_set_cookies(client: httpx.AsyncClient, login_data: dict):
+    response = await client.post("/api/auth/login", json=login_data)
+
+    for token in ["access_token", "refresh_token"]:
+        client.cookies.set(token, response.cookies.get(token))
+
+    assert response.status_code == 200
+    assert response.json() == {"detail": "Tokens set"}

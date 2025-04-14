@@ -8,38 +8,27 @@ from src.users.domain.dtos import UserCreateDTO, UserUpdateDTO
 from src.users.domain.exceptions import UserNotFound
 from src.users.domain.interfaces import IUserUnitOfWork
 
+user_create_dto = UserCreateDTO(
+    email="user@example.com",
+    password="securepassword!1",
+    is_active=True,
+    is_superuser=False,
+    is_verified=False
+)
+
 
 @pytest.mark.asyncio
 async def test_register_user(fake_user_uow: IUserUnitOfWork):
-    # Подготовка данных
-    create_data = UserCreateDTO(
-        email="user@example.com",
-        password="securepassword!1",
-        is_active=True,
-        is_superuser=False,
-        is_verified=False
-    )
-    # Выполнение use case
-    user = await register_user(create_data, fake_user_uow)
-
-    assert user.email == create_data.email
+    user = await register_user(user_create_dto, fake_user_uow)
+    assert user.email == user_create_dto.email
 
 
 @pytest.mark.asyncio
 async def test_get_user_profile(fake_user_uow: IUserUnitOfWork):
-    # Подготовка данных
-    create_data = UserCreateDTO(
-        email="user@example.com",
-        password="securepassword!1",
-        is_active=True,
-        is_superuser=False,
-        is_verified=False
-    )
-    # Выполнение use case
-    user = await register_user(create_data, fake_user_uow)
+    user = await register_user(user_create_dto, fake_user_uow)
     result = await get_user_profile(user_pk=user.id, uow=fake_user_uow)
     assert result.id == 1
-    assert result.email == "user@example.com"
+    assert result.email == user_create_dto.email
 
     with pytest.raises(UserNotFound) as exc:
         await get_user_profile(user_pk=-1, uow=fake_user_uow)
@@ -48,20 +37,12 @@ async def test_get_user_profile(fake_user_uow: IUserUnitOfWork):
 
 @pytest.mark.asyncio
 async def test_update_user(fake_user_uow: IUserUnitOfWork):
-    # Подготовка данных
-    create_data = UserCreateDTO(
-        email="user@example.com",
-        password="securepassword!1",
-        is_active=True,
-        is_superuser=False,
-        is_verified=False
-    )
+    user = await register_user(user_create_dto, fake_user_uow)
+
     update_data = UserUpdateDTO(email="user_new@example.com")
-    # Выполнение use case
-    user = await register_user(create_data, fake_user_uow)
     new_user = await update_user(user_pk=user.id, user_data=update_data, uow=fake_user_uow)
     assert new_user.id == user.id
-    assert new_user.email == "user_new@example.com"
+    assert new_user.email == update_data.email
 
     with pytest.raises(UserNotFound) as exc:
         await update_user(user_pk=-1, user_data=update_data, uow=fake_user_uow)
@@ -70,16 +51,7 @@ async def test_update_user(fake_user_uow: IUserUnitOfWork):
 
 @pytest.mark.asyncio
 async def test_delete_user(fake_user_uow: IUserUnitOfWork):
-    # Подготовка данных
-    create_data = UserCreateDTO(
-        email="user@example.com",
-        password="securepassword!1",
-        is_active=True,
-        is_superuser=False,
-        is_verified=False
-    )
-    # Выполнение use case
-    user = await register_user(create_data, fake_user_uow)
+    user = await register_user(user_create_dto, fake_user_uow)
     no_user = await delete_user(user_pk=user.id, uow=fake_user_uow)
     assert no_user is None
 

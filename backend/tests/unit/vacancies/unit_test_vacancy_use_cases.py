@@ -15,11 +15,9 @@ async def test_collect_all_vacancies(monkeypatch):
     fake_vacancy = MagicMock()
     domain_vacancy = Vacancy(source_id="1", source_name=VacancySource.HEADHUNTER)
 
-    # mocks
     mock_client = AsyncMock()
     mock_client.get_all_vacancies.return_value = [fake_vacancy]
 
-    # подменим маппер
     monkeypatch.setattr(
         VacancyAPIToDomainMapper,
         "map",
@@ -31,7 +29,6 @@ async def test_collect_all_vacancies(monkeypatch):
 
     db_result = BulkResult(success=1, failed=0, total=1)
     search_result = BulkResult(success=1, failed=0, total=1)
-
     # Act
     result = await collect_all_vacancies(
         search_params=search_params,
@@ -39,7 +36,7 @@ async def test_collect_all_vacancies(monkeypatch):
         uow=mock_uow,
         search_repo=mock_search_repo
     )
-
+    # Assert
     mock_client.get_all_vacancies.assert_awaited_once_with(search_params)
     assert result == {
         "database": db_result,

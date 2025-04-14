@@ -17,6 +17,13 @@ import logging.config
 LOG_DIR = "/app/logs"
 log_file = os.path.join(LOG_DIR, "app.log")
 
+
+class LogMessageFilter(logging.Filter):
+    def filter(self, record: logging.LogRecord) -> bool:
+        message_templates = []
+        return not any([True for template in message_templates if template in record.getMessage()])
+
+
 LOGGING_CONFIG = {
     'version': 1,
     'disable_existing_loggers': True,
@@ -79,7 +86,7 @@ LOGGING_CONFIG = {
         'stream_json_handler': {
             'formatter': 'json',
             'class': 'logging.StreamHandler',
-            'stream': 'ext://sys.stdout',  # Default is stderr
+            'stream': 'ext://sys.stdout',
         },
         'file_handler': {
             'formatter': 'json',
@@ -89,39 +96,51 @@ LOGGING_CONFIG = {
             'backupCount': 3,
         },
     },
+    'filters': {
+        'message_filter': {
+            '()': LogMessageFilter,
+        },
+    },
     'loggers': {
-        "root": {  # root logger
-            "level": "INFO",  # "INFO",
+        "root": {
+            "level": "INFO",
             "handlers": ["stream_standard_handler", "file_handler"],
+            'filters': ['message_filter'],
             "propagate": False,
         },
         'uvicorn': {
             'handlers': ['stream_standard_handler', 'file_handler'],
+            'filters': ['message_filter'],
             'level': 'INFO',
             'propagate': False
         },
         'uvicorn.access': {
             'handlers': ['stream_standard_handler', 'file_handler'],
+            'filters': ['message_filter'],
             'level': 'INFO',
             'propagate': False
         },
         'uvicorn.error': {
             'handlers': ['stream_standard_handler', 'file_handler'],
+            'filters': ['message_filter'],
             'level': 'INFO',
             'propagate': False
         },
         'uvicorn.asgi': {
             'handlers': ['stream_standard_handler', 'file_handler'],
+            'filters': ['message_filter'],
             'level': 'INFO',
             'propagate': False
         },
         'celery': {
             'handlers': ['stream_standard_handler', 'file_handler'],
+            'filters': ['message_filter'],
             'level': 'INFO',
             'propagate': False
         },
         'celery.worker': {
             'handlers': ['stream_standard_handler', 'file_handler'],
+            'filters': ['message_filter'],
             'level': 'INFO',
             'propagate': False
         },

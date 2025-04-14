@@ -29,7 +29,6 @@ class JWTRefreshMiddleware(BaseHTTPMiddleware):
         # Ensure refresh token is still valid before updating response with new access
         post_auth = await get_token_auth(request=request, response=response)
         refresh_data = await post_auth.read_token(TokenType.REFRESH)
-
         if refresh_data:
             await pre_auth.update_response(response)
 

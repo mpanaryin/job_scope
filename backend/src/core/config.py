@@ -53,6 +53,12 @@ class Settings(BaseSettings):
 
     @field_validator("DATABASE_URI")
     def assemble_db_connection(cls, v: str | None, info: ValidationInfo) -> str:
+        if os.environ.get("ENVIRONMENT") == "testing":
+            db_name = os.getenv("DB_NAME")
+            db_host = os.getenv("DB_HOST")
+            if "test" not in db_name and "test" not in db_host:
+                raise RuntimeError("Testing mode enabled, but DB_NAME and DB_HOST does not look like test database.")
+
         if isinstance(v, str):
             return v
         db_type = info.data.get("DB_TYPE")

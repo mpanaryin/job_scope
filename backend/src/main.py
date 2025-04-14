@@ -8,6 +8,7 @@ from prometheus_fastapi_instrumentator import Instrumentator
 from sqladmin import Admin
 from starlette.staticfiles import StaticFiles
 
+import src.core.infrastructure.logging_setup
 from src.core.config import settings
 from src.core.domain.exceptions import AppException
 
