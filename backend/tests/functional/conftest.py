@@ -2,6 +2,7 @@ from unittest.mock import MagicMock, AsyncMock
 
 import pytest
 
+from src.auth.infrastructure.services.password import BcryptPasswordHasher
 from src.main import app
 from src.users.presentation.dependencies import get_user_uow
 from tests.fakes.users import FakeUserUnitOfWork
@@ -30,7 +31,8 @@ def override_user_uow():
 def set_fake_check_password(monkeypatch):
     def _patch(return_value: bool):
         monkeypatch.setattr(
-            "src.auth.application.use_cases.authentication.check_password",
-            lambda password, hashed: return_value
+            BcryptPasswordHasher,
+            "verify",
+            lambda self, password, hashed: return_value
         )
     return _patch

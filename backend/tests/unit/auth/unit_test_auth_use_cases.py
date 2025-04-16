@@ -20,16 +20,16 @@ async def test_authenticate(monkeypatch, fake_user_uow: IUserUnitOfWork):
     )
     user = await fake_user_uow.users.add(user_data)
 
-    monkeypatch.setattr(
-        "src.auth.application.use_cases.authentication.check_password",
-        lambda password, hashed: True
-    )
+    mock_hasher = MagicMock()
+    mock_hasher.hash = MagicMock()
+    mock_hasher.hash.return_value = True
 
     mock_auth = MagicMock()
     mock_auth.set_tokens = AsyncMock()
     # Act
     result = await authenticate(
         credentials=AuthUserDTO(email=user_data.email, password="securepassword!1"),
+        pwd_hasher=mock_hasher,
         uow=fake_user_uow,
         auth=mock_auth
     )

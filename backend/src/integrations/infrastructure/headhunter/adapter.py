@@ -4,20 +4,20 @@ import os
 
 from src.core.config import settings
 from src.integrations.application.services.api_client import AuthType, APIClientService
-from src.integrations.infrastructure.headhunter.contracts.request import (
+from src.integrations.infrastructure.headhunter.schemas.request import (
     HHAccessApplicationTokenParams,
     HHVacancySearchParams
 )
-from src.integrations.infrastructure.headhunter.contracts.response import HHVacancyResponse, HHVacancy
+from src.integrations.infrastructure.headhunter.schemas.response import HHVacancyResponse, HHVacancy
 from src.integrations.domain.interfaces import IVacancySourceClient, IAsyncHttpClient
 from src.integrations.infrastructure.http.aiohttp_client import AiohttpClient
 
 
-class HeadHunterClient(APIClientService, IVacancySourceClient[HHVacancySearchParams, HHVacancy, HHVacancyResponse]):
+class HeadHunterAdapter(APIClientService, IVacancySourceClient[HHVacancySearchParams, HHVacancy, HHVacancyResponse]):
     """
-    Client for interacting with the HeadHunter public API.
+    Adapter for interacting with the HeadHunter public API.
 
-    This client implements the `IVacancySourceClient` interface and provides
+    This adapter implements the `IVacancySourceClient` interface and provides
     an abstraction over key endpoints such as:
     - Access token retrieval (application-level)
     - Application information
@@ -36,7 +36,7 @@ class HeadHunterClient(APIClientService, IVacancySourceClient[HHVacancySearchPar
         auth_type: AuthType = AuthType.BEARER_TOKEN,
         token: str | None = os.environ.get("HEADHUNTER_TOKEN")
     ):
-        super(HeadHunterClient, self).__init__(source_url, client=client, auth_type=auth_type, token=token)
+        super(HeadHunterAdapter, self).__init__(source_url, client=client, auth_type=auth_type, token=token)
 
     async def get_access_token(self) -> dict:
         """

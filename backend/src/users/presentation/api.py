@@ -1,5 +1,6 @@
 from fastapi import APIRouter
 
+from src.auth.presentation.dependencies import PWDHasherDep
 from src.crud.router import CRUDRouter
 from src.users.application.use_cases.user_delete import delete_user
 from src.users.application.use_cases.user_profile import get_user_profile
@@ -13,11 +14,11 @@ user_api_router = APIRouter()
 
 
 @user_api_router.post("", response_model=UserReadDTO)
-async def register(user_data: UserCreateDTO, uow: UserUoWDep):
+async def register(user_data: UserCreateDTO, pwd_hasher: PWDHasherDep, uow: UserUoWDep):
     """
     Register a new user.
     """
-    return await register_user(user_data, uow=uow)
+    return await register_user(user_data, pwd_hasher=pwd_hasher, uow=uow)
 
 
 @user_api_router.get("/{user_id}", response_model=UserReadDTO)

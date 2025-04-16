@@ -3,7 +3,7 @@ import logging
 from asgiref.sync import async_to_sync
 from celery import shared_task
 
-from src.integrations.infrastructure.headhunter.contracts.request import HHVacancySearchParams
+from src.integrations.infrastructure.headhunter.schemas.request import HHVacancySearchParams
 from src.vacancies.application.use_cases.vacancy_collector import collect_vacancies
 from src.vacancies.presentation.dependencies import get_headhunter_client, get_vacancy_search_repo, get_vacancy_uow
 

@@ -3,8 +3,7 @@ from typing import Annotated
 from fastapi import APIRouter, Body
 
 from src.auth.application.use_cases.authentication import authenticate
-from src.auth.domain.entities import TokenType
-from src.auth.presentation.dependencies import TokenAuthDep
+from src.auth.presentation.dependencies import TokenAuthDep, PWDHasherDep
 from src.auth.presentation.permissions import access_control
 from src.auth.domain.dtos import AuthUserDTO
 from src.users.domain.dtos import UserReadDTO
@@ -14,11 +13,11 @@ auth_api_router = APIRouter()
 
 
 @auth_api_router.post("/login")
-async def login(credentials: AuthUserDTO, auth: TokenAuthDep, uow: UserUoWDep):
+async def login(credentials: AuthUserDTO, pwd_hasher: PWDHasherDep, uow: UserUoWDep, auth: TokenAuthDep):
     """
     Authenticate user and issue JWT tokens.
     """
-    await authenticate(credentials, uow, auth)
+    await authenticate(credentials, pwd_hasher, uow, auth)
     return {"detail": "Tokens set"}
 
 

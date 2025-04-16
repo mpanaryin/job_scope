@@ -2,9 +2,9 @@ services:
   app:
     build:
       context: ./backend
-    command: bash -c "alembic upgrade head && uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload"
-    ports:
-      - "8000:8000"
+    depends_on:
+      - db
+      - redis
     volumes:
       - ./backend:/app
       - ./logs/fastapi:/app/logs
@@ -12,42 +12,42 @@ services:
       - ./static:/static
     env_file:
       - .env.test
-    depends_on:
-      - db
-      - redis
+    ports:
+      - "8000:8000"
+    command: bash -c "alembic upgrade head && uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload"
 
   db:
     image: postgres:16
-    restart: always
+    volumes:
+      - postgres_test_data:/var/lib/postgresql/data
     env_file:
       - .env.test
     environment:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: ${DB_NAME}
-    volumes:
-      - postgres_test_data:/var/lib/postgresql/data
+    restart: always
 
   redis:
     image: redis:latest
-    restart: always
     volumes:
       - ./infra/redis/redis.conf:/usr/local/etc/redis/redis.conf
     command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
+    restart: always
 
   nginx:
     build: ./infra/nginx
+    depends_on:
+      - app
+    volumes:
+      - ./media:/media:ro
+      - ./static:/static:ro
+      - ./logs/nginx:/var/log/nginx
     env_file:
       - .env.test
     ports:
       - "80:80"
       - "443:443"
-    volumes:
-      - ./media:/media:ro
-      - ./static:/static:ro
-      - ./logs/nginx:/var/log/nginx
-    depends_on:
-      - app
 
 volumes:
   postgres_test_data:

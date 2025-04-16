@@ -6,11 +6,25 @@ from starlette.responses import Response
 
 from src.auth.config import auth_config
 from src.auth.domain.entities import TokenType
-from src.auth.domain.interfaces import ITokenStorage, ITokenAuth
+from src.auth.domain.interfaces import ITokenStorage, ITokenAuth, IPasswordHasher
 from src.auth.infrastructure.services.jwt import JWTAuth, JWTProvider
+from src.auth.infrastructure.services.password import BcryptPasswordHasher
 from src.auth.infrastructure.services.redis_token_storage import RedisTokenStorage
 from src.auth.infrastructure.transport.cookie import CookieTransport
 from src.auth.infrastructure.transport.header import HeaderTransport
+
+
+def get_password_hasher() -> IPasswordHasher:
+    """
+    Dependency provider for password hashing service.
+
+    Returns an instance of `IPasswordHasher` implemented using the Bcrypt algorithm.
+    This function is intended to be used as a dependency injection entry point
+    in application or presentation layers.
+
+    :return: A password hasher instance conforming to the `IPasswordHasher` interface.
+    """
+    return BcryptPasswordHasher()
 
 
 def get_token_storage() -> ITokenStorage:
@@ -65,3 +79,4 @@ async def get_token_auth(request: Request = None, response: Response = None) -> 
 
 TokenAuthDep = Annotated[ITokenAuth, Depends(get_token_auth)]
 TokenStorageDep = Annotated[ITokenStorage, Depends(get_token_storage)]
+PWDHasherDep = Annotated[IPasswordHasher, Depends(get_password_hasher)]

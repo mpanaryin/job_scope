@@ -1,6 +1,6 @@
 from pydantic import AnyUrl
 
-from src.integrations.infrastructure.headhunter.contracts.response import HHVacancy
+from src.integrations.infrastructure.headhunter.schemas.response import HHVacancy
 from src.integrations.domain.interfaces import TVacancy
 from src.vacancies.application.mappers.helpers import HHVacancyToDomainMapper
 from src.vacancies.domain.entities import Vacancy

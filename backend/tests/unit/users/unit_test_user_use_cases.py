@@ -1,3 +1,5 @@
+from unittest.mock import MagicMock
+
 import pytest
 
 from src.users.application.use_cases.user_registration import register_user
@@ -5,6 +7,7 @@ from src.users.application.use_cases.user_profile import get_user_profile
 from src.users.application.use_cases.user_update import update_user
 from src.users.application.use_cases.user_delete import delete_user
 from src.users.domain.dtos import UserCreateDTO, UserUpdateDTO
+from src.users.domain.entities import User
 from src.users.domain.exceptions import UserNotFound
 from src.users.domain.interfaces import IUserUnitOfWork
 
@@ -19,13 +22,12 @@ user_create_dto = UserCreateDTO(
 
 @pytest.mark.asyncio
 async def test_register_user(fake_user_uow: IUserUnitOfWork):
-    user = await register_user(user_create_dto, fake_user_uow)
-    assert user.email == user_create_dto.email
+    await _register_user(fake_user_uow)
 
 
 @pytest.mark.asyncio
 async def test_get_user_profile(fake_user_uow: IUserUnitOfWork):
-    user = await register_user(user_create_dto, fake_user_uow)
+    user = await _register_user(fake_user_uow)
     result = await get_user_profile(user_pk=user.id, uow=fake_user_uow)
     assert result.id == 1
     assert result.email == user_create_dto.email
@@ -37,7 +39,7 @@ async def test_get_user_profile(fake_user_uow: IUserUnitOfWork):
 
 @pytest.mark.asyncio
 async def test_update_user(fake_user_uow: IUserUnitOfWork):
-    user = await register_user(user_create_dto, fake_user_uow)
+    user = await _register_user(fake_user_uow)
 
     update_data = UserUpdateDTO(email="user_new@example.com")
     new_user = await update_user(user_pk=user.id, user_data=update_data, uow=fake_user_uow)
@@ -51,10 +53,20 @@ async def test_update_user(fake_user_uow: IUserUnitOfWork):
 
 @pytest.mark.asyncio
 async def test_delete_user(fake_user_uow: IUserUnitOfWork):
-    user = await register_user(user_create_dto, fake_user_uow)
+    user = await _register_user(fake_user_uow)
     no_user = await delete_user(user_pk=user.id, uow=fake_user_uow)
     assert no_user is None
 
     with pytest.raises(UserNotFound) as exc:
         await delete_user(user_pk=user.id, uow=fake_user_uow)
     assert exc.type is UserNotFound
+
+
+async def _register_user(user_uow: IUserUnitOfWork) -> User:
+    mock_hasher = MagicMock()
+    mock_hasher.hash = MagicMock()
+    mock_hasher.hash.return_value = 'hashed_secure_pwd'
+
+    user = await register_user(user_create_dto, mock_hasher, user_uow)
+    assert user.email == user_create_dto.email
+    return user

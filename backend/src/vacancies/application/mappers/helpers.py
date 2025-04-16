@@ -1,4 +1,4 @@
-from src.integrations.infrastructure.headhunter.contracts.response import (
+from src.integrations.infrastructure.headhunter.schemas.response import (
     HHVacancy, HHMetroStation, HHAddress, HHArea, HHEmployer,
     HHEmployment, HHExperience, HHSalary, HHSchedule,
     HHType, HHProfessionalRole

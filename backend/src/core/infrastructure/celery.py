@@ -3,7 +3,7 @@ from celery import Celery
 from celery.signals import setup_logging
 
 celery_app = Celery(
-    "core",
+    "src.core.infrastructure",
     broker=os.getenv("CELERY_BROKER_URL"),
     backend=os.getenv("CELERY_RESULT_BACKEND")
 )

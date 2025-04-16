@@ -6,118 +6,121 @@ services:
 
   app:
     image: job_scope_backend:latest
-    command: uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload
+    depends_on:
+      - db
+      - elasticsearch
+      - redis
     volumes:
       - ./backend:/app
       - ./logs/fastapi:/app/logs
       - ./media:/media
       - ./static:/static
-    ports:
-      - "8000:8000"
     env_file:
       - .env.dev
-    depends_on:
-      - db
-      - elasticsearch
-      - redis
+    ports:
+      - "8000:8000"
+    command: uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload
 
   redis:
     image: redis:latest
-    restart: always
     volumes:
       - redis_data:/data  # RDB + AOF
       - ./infra/redis/redis.conf:/usr/local/etc/redis/redis.conf
+    #    ports:
+    #      - "6379:6379"
     command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
-#    ports:
-#      - "6379:6379"
+    restart: always
 
   flower:
     image: mher/flower:latest
     container_name: flower
-    command: celery --broker=redis://redis:6379/0 flower
+    depends_on:
+      - redis
+      - celery
     env_file:
       - .env.dev
     environment:
       - FLOWER_BASIC_AUTH=${FLOWER_USER}:${FLOWER_PASSWORD}
     ports:
       - "5555:5555"
-    depends_on:
-      - redis
-      - celery
+    command: celery --broker=redis://redis:6379/0 flower
 
   celery:
     image: job_scope_backend:latest
-    command: celery -A src.core.celery worker --loglevel=info
-    env_file:
-      - .env.dev
-    volumes:
-      - ./backend:/app
-      - ./logs/fastapi:/app/logs
-      - ./media:/media
-      - ./static:/static
     depends_on:
       - redis
       - app
-
-  celery-beat:
-    image: job_scope_backend:latest
-    env_file:
-      - .env.dev
-    command: celery -A src.core.celery beat --loglevel=info
     volumes:
       - ./backend:/app
       - ./logs/fastapi:/app/logs
       - ./media:/media
       - ./static:/static
+    env_file:
+      - .env.dev
+    command: celery -A src.core.infrastructure.celery worker --loglevel=info
+
+  celery-beat:
+    image: job_scope_backend:latest
     depends_on:
       - redis
       - celery
+    volumes:
+      - ./backend:/app
+      - ./logs/fastapi:/app/logs
+      - ./media:/media
+      - ./static:/static
+    env_file:
+      - .env.dev
+    command: celery -A src.core.infrastructure.celery beat --loglevel=info
 
   db:
     image: postgres:16
-    restart: always
-    env_file:
-      - .env.dev
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./infra/postgresql/postgresql.conf:/etc/postgresql/postgresql.conf:ro
       - ./logs/postgresql:/var/log/postgresql
+    env_file:
+      - .env.dev
+    #    ports:
+    #      - "5432:5432"
     command: postgres -c config_file=/etc/postgresql/postgresql.conf
-#    ports:
-#      - "5432:5432"
+    restart: always
 
   nginx:
     build: ./infra/nginx
+    depends_on:
+      - app
+    volumes:
+      - ./media:/media:ro
+      - ./static:/static:ro
+      - ./logs/nginx:/var/log/nginx
     env_file:
       - .env.dev
     ports:
       - "80:80"
       - "443:443"
-    volumes:
-      - ./media:/media:ro
-      - ./static:/static:ro
-      - ./logs/nginx:/var/log/nginx
-    depends_on:
-      - app
 
   logstash:
     image: docker.elastic.co/logstash/logstash:8.17.3
     container_name: logstash
+    depends_on:
+      - elasticsearch
+    volumes:
+      - ./infra/elk/logstash/pipeline:/usr/share/logstash/pipeline
+      - ./infra/elk/logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml
     env_file:
       - .env.dev
     environment:
         - LS_JAVA_OPTS=${LS_JAVA_OPTS}
-    volumes:
-      - ./infra/elk/logstash/pipeline:/usr/share/logstash/pipeline
-      - ./infra/elk/logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml
     ports:
       - "5044:5044"
-    depends_on:
-      - elasticsearch
+
 
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.17.3
     container_name: elasticsearch
+    volumes:
+      - elastic_data:/usr/share/elasticsearch/data
     env_file:
       - .env.dev
     environment:
@@ -126,23 +129,19 @@ services:
       - ES_JAVA_OPTS=${ES_JAVA_OPTS}  # Ограничение памяти
     ports:
       - "9200:9200"
-    volumes:
-      - elastic_data:/usr/share/elasticsearch/data
 
   kibana:
     image: docker.elastic.co/kibana/kibana:8.17.3
     container_name: kibana
-    env_file:
-      - .env.dev
     depends_on:
       - elasticsearch
+    env_file:
+      - .env.dev
     ports:
       - "5601:5601"
 
   filebeat:
     build: ./infra/elk/filebeat
-    env_file:
-      - .env.dev
     depends_on:
       - app
       - logstash
@@ -152,65 +151,73 @@ services:
       - ./logs/nginx:/var/log/nginx:ro  # Логи nginx
       - ./logs/postgresql:/var/log/postgresql:ro
       - filebeat_registry:/usr/share/filebeat/data
+    env_file:
+      - .env.dev
     restart: on-failure
 
   prometheus:
     image: prom/prometheus:v3.2.1
     container_name: prometheus
+    depends_on:
+      - app
     volumes:
       - prometheus_data:/prometheus
       - ./infra/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
     ports:
       - "9090:9090"
-    depends_on:
-      - app
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--storage.tsdb.retention.time=7d"
 
   grafana:
     image: grafana/grafana:11.6.0
     container_name: grafana
+    depends_on:
+      - prometheus
     volumes:
       - grafana_data:/var/lib/grafana
       - ./infra/grafana/provisioning:/etc/grafana/provisioning
+    env_file:
+      - .env.dev
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN_USER}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD}
     ports:
       - "3000:3000"
-    environment:
-      - GF_SECURITY_ADMIN_USER=admin
-      - GF_SECURITY_ADMIN_PASSWORD=admin
-    depends_on:
-      - prometheus
 
   node_exporter:
     image: prom/node-exporter:latest
-#    ports:
-#      - "9100:9100"
     volumes:
       - /proc:/host/proc:ro
       - /sys:/host/sys:ro
       - /:/rootfs:ro
+#    ports:
+#      - "9100:9100"
 
   postgres_exporter:
     image: prometheuscommunity/postgres-exporter:latest
     container_name: postgres_exporter
+    depends_on:
+      - db
     env_file:
       - .env.dev
     environment:
-      DATA_SOURCE_NAME: postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:5432/postgres?sslmode=disable
+      DATA_SOURCE_NAME: postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/postgres?sslmode=disable
 #    ports:
 #      - "9187:9187"
     restart: always
-    depends_on:
-      - db
 
   nginx_exporter:
     image: nginx/nginx-prometheus-exporter:latest
     container_name: nginx_exporter
-    command:
-      - '-nginx.scrape-uri=http://nginx/stub_status'
-#    ports:
-#     - "9113:9113"
-    restart: always
     depends_on:
       - nginx
+    #    ports:
+    #     - "9113:9113"
+    command:
+      - '-nginx.scrape-uri=http://nginx/stub_status'
+    restart: always
 
 volumes:
   redis_data:

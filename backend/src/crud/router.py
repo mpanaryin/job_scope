@@ -17,7 +17,7 @@ class CRUDRouter:
     A generic CRUD router generator for FastAPI.
 
     Automatically generates standard REST endpoints (create, read, update, delete)
-    based on a given CRUD service and Pydantic contracts.
+    based on a given CRUD service and Pydantic schemas.
 
     Attributes:
         crud (CRUDBase): The service class responsible for database operations.

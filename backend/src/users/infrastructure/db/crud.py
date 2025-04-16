@@ -4,8 +4,8 @@ from urllib.request import Request
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
+from src.auth.infrastructure.services.password import BcryptPasswordHasher
 from src.users.infrastructure.db import orm
-from src.auth.infrastructure.services.password import hash_password
 from src.crud.base import CRUDBase
 
 
@@ -28,7 +28,7 @@ class UserService(CRUDBase, model=orm.UserDB):
         password = data.pop("password", "")
         obj = self.model(**data)
         async with self.session_maker(expire_on_commit=False) as session:
-            obj.hashed_password = hash_password(password)
+            obj.hashed_password = BcryptPasswordHasher().hash(password)
             session.add(obj)
             await session.commit()
             if request:
