@@ -3,7 +3,7 @@ from src.db.base import Base
 from src.db.engine import engine
 # Import models required for database initialization
 from src.users.infrastructure.db.orm import UserDB
-from src.vacancies.infrastructure.db.orm import Vacancy
+from src.vacancies.infrastructure.db.orm import VacancyDB
 
 
 async def create_db_and_tables():
@@ -12,6 +12,8 @@ async def create_db_and_tables():
 
     This function should be called at application startup or for
     initial setup to ensure all models are created
+
+    Note: for sqlite3
     """
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)

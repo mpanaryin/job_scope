@@ -1,22 +1,25 @@
-from src.auth.domain.dtos import AuthUserDTO
 from src.auth.domain.exceptions import InvalidCredentials
-from src.auth.domain.interfaces import ITokenAuth, IPasswordHasher
+from src.auth.domain.interfaces.token_auth import ITokenAuth
 from src.users.domain.entities import User
-from src.users.domain.interfaces import IUserUnitOfWork
+from src.users.domain.interfaces.password_hasher import IPasswordHasher
+from src.users.domain.interfaces.user_uow import IUserUnitOfWork
 
 
 async def authenticate(
-    credentials: AuthUserDTO,
+    email: str,
+    password: str,
     pwd_hasher: IPasswordHasher,
     uow: IUserUnitOfWork,
     auth: ITokenAuth
 ) -> User:
     """
-    Authenticates a user based on provided credentials.
+    Authenticate a user using the provided credentials.
 
-    Verifies the user's email and password combination, and if valid, sets access and refresh tokens.
+    Verifies the user's email and password combination,
+    and if valid, sets access and refresh tokens.
 
-    :param credentials: User credentials (email and password).
+    :param email: User email.
+    :param password: User password.
     :param pwd_hasher: Password hasher
     :param uow: Unit of work to access user repository.
     :param auth: JWT authentication service for setting tokens.
@@ -24,9 +27,9 @@ async def authenticate(
     :return: User instance.
     """
     async with uow:
-        user = await uow.users.get_by_email(credentials.email)
+        user = await uow.users.get_by_email(email)
 
-        if not pwd_hasher.verify(credentials.password, user.hashed_password):
+        if not pwd_hasher.verify(password, user.hashed_password):
             raise InvalidCredentials()
 
         await auth.set_tokens(user)

@@ -12,6 +12,12 @@ new_user = UserCreateDTO(
 
 @pytest.mark.asyncio(loop_scope="session")
 async def test_register_and_get_profile(clear_db, user_factory):
+    """
+    Test registering a user and retrieving their profile.
+
+    Verifies that the user is created successfully and the profile
+    endpoint returns correct data for the given user ID.
+    """
     async with httpx.AsyncClient(base_url="http://localhost:8000") as client:
         user = await user_factory(client=client, user=new_user)
         assert user["email"] == new_user.email
@@ -24,6 +30,12 @@ async def test_register_and_get_profile(clear_db, user_factory):
 
 @pytest.mark.asyncio(loop_scope="session")
 async def test_register_and_update_user(clear_db, user_factory):
+    """
+    Test registering a user and updating their email.
+
+    Verifies that the PATCH request updates the user's email and
+    the response reflects the changes.
+    """
     async with httpx.AsyncClient(base_url="http://localhost:8000") as client:
         user = await user_factory(client=client, user=new_user)
         assert user["email"] == new_user.email
@@ -39,6 +51,11 @@ async def test_register_and_update_user(clear_db, user_factory):
 
 @pytest.mark.asyncio(loop_scope="session")
 async def test_register_and_delete_user(clear_db, user_factory):
+    """
+    Test registering and then deleting a user.
+
+    Ensures that the DELETE endpoint successfully removes the user.
+    """
     async with httpx.AsyncClient(base_url="http://localhost:8000") as client:
         user = await user_factory(client=client, user=new_user)
         assert user["email"] == new_user.email

@@ -4,7 +4,7 @@ from urllib.request import Request
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
-from src.auth.infrastructure.services.password import BcryptPasswordHasher
+from src.users.infrastructure.services.password_hasher import BcryptPasswordHasher
 from src.users.infrastructure.db import orm
 from src.crud.base import CRUDBase
 

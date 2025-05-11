@@ -13,9 +13,23 @@ filebeat.inputs:
   - type: log
     enabled: true
     paths:
-      - /var/log/nginx/*.log
+      - /var/log/nginx/access.log
     fields:
       log_type: nginx
+      log_level: INFO
+      source: nginx
+      env: ${ENVIRONMENT}
+    multiline.pattern: '^\d{4}/\d{2}/\d{2}'  # Для объединения stacktrace (если нужно)
+    multiline.negate: true
+    multiline.match: after
+
+  - type: log
+    enabled: true
+    paths:
+      - /var/log/nginx/error.log
+    fields:
+      log_type: nginx
+      log_level: ERROR
       source: nginx
       env: ${ENVIRONMENT}
     multiline.pattern: '^\d{4}/\d{2}/\d{2}'  # Для объединения stacktrace (если нужно)

@@ -2,7 +2,6 @@ import datetime
 from typing import Any
 from zoneinfo import ZoneInfo
 
-from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel, model_validator, Field
 
 
@@ -30,15 +29,6 @@ class CustomModel(BaseModel):
                 setattr(self, field_name, value)
 
         return self
-
-    def serializable_dict(self, **kwargs):
-        """
-        Return a JSON-serializable dictionary representation of the model.
-
-        Uses FastAPI's `jsonable_encoder` for safe serialization of complex types.
-        """
-        default_dict = self.model_dump()
-        return jsonable_encoder(default_dict)
 
 
 class BulkResult(BaseModel):

@@ -1,6 +1,6 @@
-from src.auth.domain.interfaces import IPasswordHasher
 from src.users.domain.entities import UserCreate, User
-from src.users.domain.interfaces import IUserUnitOfWork
+from src.users.domain.interfaces.password_hasher import IPasswordHasher
+from src.users.domain.interfaces.user_uow import IUserUnitOfWork
 from src.users.domain.dtos import UserCreateDTO
 
 

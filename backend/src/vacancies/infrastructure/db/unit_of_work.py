@@ -1,7 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.db.engine import async_session_maker
-from src.vacancies.domain.interfaces import IVacancyUnitOfWork
+from src.vacancies.domain.interfaces.vacancy_uow import IVacancyUnitOfWork
 from src.vacancies.infrastructure.db.repositories import PGVacancyRepository
 
 

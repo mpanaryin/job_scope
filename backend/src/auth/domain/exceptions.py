@@ -1,4 +1,4 @@
-from src.core.domain.exceptions import BadRequest, NotAuthenticated
+from src.core.domain.exceptions.exceptions import BadRequest, NotAuthenticated
 
 
 class ErrorCode:

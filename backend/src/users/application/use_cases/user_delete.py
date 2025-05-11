@@ -1,4 +1,4 @@
-from src.users.domain.interfaces import IUserUnitOfWork
+from src.users.domain.interfaces.user_uow import IUserUnitOfWork
 
 
 async def delete_user(user_pk: int, uow: IUserUnitOfWork) -> None:

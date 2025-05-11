@@ -6,12 +6,14 @@ from starlette.responses import Response
 
 from src.auth.config import auth_config
 from src.auth.domain.entities import TokenType
-from src.auth.domain.interfaces import ITokenStorage, ITokenAuth, IPasswordHasher
+from src.auth.domain.interfaces.token_auth import ITokenAuth
+from src.auth.domain.interfaces.token_storage import ITokenStorage
 from src.auth.infrastructure.services.jwt import JWTAuth, JWTProvider
-from src.auth.infrastructure.services.password import BcryptPasswordHasher
+from src.users.domain.interfaces.password_hasher import IPasswordHasher
+from src.users.infrastructure.services.password_hasher import BcryptPasswordHasher
 from src.auth.infrastructure.services.redis_token_storage import RedisTokenStorage
-from src.auth.infrastructure.transport.cookie import CookieTransport
-from src.auth.infrastructure.transport.header import HeaderTransport
+from src.auth.infrastructure.transports.cookie import CookieTransport
+from src.auth.infrastructure.transports.header import HeaderTransport
 
 
 def get_password_hasher() -> IPasswordHasher:
@@ -79,4 +81,4 @@ async def get_token_auth(request: Request = None, response: Response = None) -> 
 
 TokenAuthDep = Annotated[ITokenAuth, Depends(get_token_auth)]
 TokenStorageDep = Annotated[ITokenStorage, Depends(get_token_storage)]
-PWDHasherDep = Annotated[IPasswordHasher, Depends(get_password_hasher)]
+PasswordHasherDep = Annotated[IPasswordHasher, Depends(get_password_hasher)]

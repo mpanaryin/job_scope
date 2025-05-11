@@ -2,8 +2,8 @@ from typing import Annotated
 
 from fastapi import Depends
 
-from src.integrations.infrastructure.headhunter.adapter import HeadHunterAdapter
-from src.vacancies.domain.interfaces import IVacancySearchRepository, IVacancyUnitOfWork
+from src.vacancies.domain.interfaces.vacancy_search_repo import IVacancySearchRepository
+from src.vacancies.domain.interfaces.vacancy_uow import IVacancyUnitOfWork
 from src.vacancies.infrastructure.db.unit_of_work import PGVacancyUnitOfWork
 from src.vacancies.infrastructure.elastic.repositories import ESVacancySearchRepository
 
@@ -29,17 +29,6 @@ def get_vacancy_search_repo() -> IVacancySearchRepository:
     :return: An instance of IVacancySearchRepository (ESVacancySearchRepository).
     """
     return ESVacancySearchRepository()
-
-
-def get_headhunter_client() -> HeadHunterAdapter:
-    """
-    Dependency provider for the HeadHunter API client.
-
-    Creates and returns a client configured to interact with the HeadHunter external API.
-
-    :return: An instance of HeadHunterClient.
-    """
-    return HeadHunterAdapter()
 
 
 VacancySearchRepoDep = Annotated[IVacancySearchRepository, Depends(get_vacancy_search_repo)]

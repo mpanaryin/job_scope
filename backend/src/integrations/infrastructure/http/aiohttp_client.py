@@ -1,4 +1,3 @@
-"""Aiohttp client class utility."""
 import asyncio
 import logging
 from socket import AF_INET
@@ -6,11 +5,14 @@ from socket import AF_INET
 import aiohttp
 from aiohttp.client import _RequestOptions
 
+from src.integrations.infrastructure.http.interfaces import IAsyncHttpClient
+
 SIZE_POOL_AIOHTTP = 100
 
 
-class AiohttpClient(object):
-    """Aiohttp session client utility.
+class AiohttpClient(IAsyncHttpClient):
+    """
+    Aiohttp session client utility.
 
     Utility class for handling HTTP async request for whole FastAPI application
     scope.
@@ -28,7 +30,8 @@ class AiohttpClient(object):
 
     @classmethod
     def get_aiohttp_client(cls) -> aiohttp.ClientSession:
-        """Create aiohttp client session object instance.
+        """
+        Create aiohttp client session object instance.
 
         Returns:
             aiohttp.ClientSession: ClientSession object instance.
@@ -58,7 +61,8 @@ class AiohttpClient(object):
 
     @classmethod
     async def get(cls, url: str, **kwargs: _RequestOptions) -> aiohttp.ClientResponse:
-        """Execute HTTP GET request.
+        """
+        Execute HTTP GET request.
 
         Args:
             url (str): HTTP GET request endpoint.
@@ -77,7 +81,9 @@ class AiohttpClient(object):
 
     @classmethod
     async def post(cls, url: str, **kwargs: _RequestOptions) -> aiohttp.ClientResponse:
-        """Execute HTTP POST request.
+        """
+        Execute HTTP POST request.
+
         Args:
             url (str): HTTP POST request endpoint.
             **kwargs (_RequestOptions): Defaults kwargs for aiohttp request
@@ -93,7 +99,9 @@ class AiohttpClient(object):
 
     @classmethod
     async def put(cls, url: str, **kwargs: _RequestOptions) -> aiohttp.ClientResponse:
-        """Execute HTTP PUT request.
+        """
+        Execute HTTP PUT request.
+
         Args:
             url (str): HTTP PUT request endpoint.
             **kwargs (_RequestOptions): Defaults kwargs for aiohttp request
@@ -109,7 +117,9 @@ class AiohttpClient(object):
 
     @classmethod
     async def delete(cls, url: str, **kwargs: _RequestOptions) -> aiohttp.ClientResponse:
-        """Execute HTTP DELETE request.
+        """
+        Execute HTTP DELETE request.
+
         Args:
             url (str): HTTP DELETE request endpoint.
             **kwargs (_RequestOptions): Defaults kwargs for aiohttp request
@@ -124,7 +134,9 @@ class AiohttpClient(object):
 
     @classmethod
     async def patch(cls, url: str, **kwargs: _RequestOptions) -> aiohttp.ClientResponse:
-        """Execute HTTP PATCH request.
+        """
+        Execute HTTP PATCH request.
+
         Args:
             url (str): HTTP PATCH request endpoint.
             **kwargs (_RequestOptions): Defaults kwargs for aiohttp request

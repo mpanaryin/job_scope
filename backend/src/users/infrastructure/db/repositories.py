@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.users.domain.entities import User, UserCreate, UserUpdate
 from src.users.domain.exceptions import UserAlreadyExists, UserNotFound
-from src.users.domain.interfaces import IUserRepository
+from src.users.domain.interfaces.user_repo import IUserRepository
 from src.users.infrastructure.db.orm import UserDB
 
 
@@ -50,14 +50,7 @@ class PGUserRepository(IUserRepository):
                 detail = "User can't be created due to integrity error."
             raise UserAlreadyExists(detail=detail)
 
-        return User(
-            id=obj.id,
-            email=obj.email,
-            hashed_password=obj.hashed_password,
-            is_active=obj.is_active,
-            is_superuser=obj.is_superuser,
-            is_verified=obj.is_verified
-        )
+        return self._to_domain(obj)
 
     async def get_by_pk(self, pk: int) -> User:
         """
@@ -67,18 +60,11 @@ class PGUserRepository(IUserRepository):
         :return: The retrieved user as a domain model.
         :raises UserNotFound: If no user with the given ID exists.
         """
-        obj = await self.session.get(UserDB, pk)
+        obj: UserDB | None = await self.session.get(UserDB, pk)
         if not obj:
             raise UserNotFound(detail=f"User with id {pk} not found")
 
-        return User(
-            id=obj.id,
-            email=obj.email,
-            hashed_password=obj.hashed_password,
-            is_active=obj.is_active,
-            is_superuser=obj.is_superuser,
-            is_verified=obj.is_verified
-        )
+        return self._to_domain(obj)
 
     async def get_by_email(self, email: str) -> User:
         """
@@ -95,14 +81,7 @@ class PGUserRepository(IUserRepository):
         if not obj:
             raise UserNotFound(detail=f"User with email {email} not found")
 
-        return User(
-            id=obj.id,
-            email=obj.email,
-            hashed_password=obj.hashed_password,
-            is_active=obj.is_active,
-            is_superuser=obj.is_superuser,
-            is_verified=obj.is_verified
-        )
+        return self._to_domain(obj)
 
     async def update(self, user_data: UserUpdate) -> User:
         """
@@ -124,14 +103,7 @@ class PGUserRepository(IUserRepository):
 
         await self.session.flush()
 
-        return User(
-            id=obj.id,
-            email=obj.email,
-            hashed_password=obj.hashed_password,
-            is_active=obj.is_active,
-            is_superuser=obj.is_superuser,
-            is_verified=obj.is_verified
-        )
+        return self._to_domain(obj)
 
     async def delete(self, pk: int) -> None:
         """
@@ -145,3 +117,14 @@ class PGUserRepository(IUserRepository):
             raise UserNotFound(detail=f"User with id {pk} not found")
 
         await self.session.delete(obj)
+
+    @staticmethod
+    def _to_domain(obj: UserDB) -> User:
+        return User(
+            id=obj.id,
+            email=obj.email,
+            hashed_password=obj.hashed_password,
+            is_active=obj.is_active,
+            is_superuser=obj.is_superuser,
+            is_verified=obj.is_verified
+        )

@@ -1,6 +1,8 @@
 from src.core.domain.entities import BulkResult
 from src.vacancies.domain.entities import Vacancy, VacancySearchQuery
-from src.vacancies.domain.interfaces import IVacancyRepository, IVacancyUnitOfWork, IVacancySearchRepository
+from src.vacancies.domain.interfaces.vacancy_repo import IVacancyRepository
+from src.vacancies.domain.interfaces.vacancy_search_repo import IVacancySearchRepository
+from src.vacancies.domain.interfaces.vacancy_uow import IVacancyUnitOfWork
 
 
 class FakeVacancyRepository(IVacancyRepository):

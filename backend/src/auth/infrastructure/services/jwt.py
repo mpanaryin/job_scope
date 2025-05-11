@@ -7,10 +7,12 @@ from starlette.requests import Request
 from starlette.responses import Response
 
 from src.auth.domain.entities import TokenData, TokenType
-from src.auth.domain.interfaces import ITokenProvider, ITokenAuth, ITokenStorage
 from src.auth.config import auth_config
 from src.auth.domain.exceptions import RefreshTokenNotValid
-from src.auth.infrastructure.transport.base import IAuthTransport
+from src.auth.domain.interfaces.token_auth import ITokenAuth
+from src.auth.domain.interfaces.token_provider import ITokenProvider
+from src.auth.domain.interfaces.token_storage import ITokenStorage
+from src.auth.infrastructure.transports.base import IAuthTransport
 from src.users.domain.entities import User
 from src.utils.datetimes import get_timezone_now
 
@@ -104,7 +106,6 @@ class JWTProvider(ITokenProvider):
         :param secret: Secret or public key for verification.
         :param algorithms: List of accepted algorithms.
         :return: Decoded JWT payload as a dictionary.
-        :raises JWTError: If token is invalid or signature is incorrect.
         """
         if algorithms is None:
             algorithms = [auth_config.JWT_ALGORITHM]
@@ -172,17 +173,6 @@ class JWTAuth(ITokenAuth):
         await self.set_token(access_token, TokenType.ACCESS)
         await self.set_token(refresh_token, TokenType.REFRESH)
 
-    async def unset_tokens(self) -> None:
-        """
-        Revoke all tokens of the current user and remove them from the response.
-        """
-        if self.token_storage:
-            await self.token_storage.revoke_tokens_by_user(self.request.state.user.id)
-
-        for token_type, transports in self.transports.items():
-            for transport in transports:
-                transport.delete_token(self.response)
-
     async def set_token(self, token: str, token_type: TokenType) -> None:
         """
         Set a single token (access or refresh) in the response and persist it if required.
@@ -196,7 +186,18 @@ class JWTAuth(ITokenAuth):
         if self.token_storage:
             await self.token_storage.store_token(self.token_provider.read_token(token))
 
-    async def update_response(self, response: Response):
+    async def unset_tokens(self) -> None:
+        """
+        Revoke all tokens of the current user and remove them from the response.
+        """
+        if self.token_storage:
+            await self.token_storage.revoke_tokens_by_user(self.request.state.user.id)
+
+        for token_type, transports in self.transports.items():
+            for transport in transports:
+                transport.delete_token(self.response)
+
+    async def inject_access_token_from_request(self, response: Response):
         """
         Inject the updated access token into the response.
 

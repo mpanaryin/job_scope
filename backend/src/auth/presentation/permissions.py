@@ -6,7 +6,7 @@ from starlette.requests import Request
 
 from src.auth.domain.exceptions import AuthRequired
 from src.auth.domain.entities import AnonymousUser
-from src.core.domain.exceptions import PermissionDenied
+from src.core.domain.exceptions.exceptions import PermissionDenied
 
 
 class access_control:  # noqa
@@ -31,20 +31,14 @@ class access_control:  # noqa
     :param superuser: If True, only superusers can access the endpoint.
     :param open: If True, anonymous users are allowed. Otherwise, authentication is required.
     """
-    MASTER_USER_ID = 0
 
     def __init__(
         self,
-        # module: Optional[AppModules] = None,
-        # resource: Optional[AppActions] = None,
         superuser: bool = False,
         open: bool = False,
     ) -> None:
-        # cls.module = module
-        # cls.resource = resource
         self.superuser: bool = superuser
         self.open: bool = open
-        self.object_id: int | None = None
         self.current_user = None
         self.request: Request | None = None
         self.headers: dict[Any, Any] | None = None

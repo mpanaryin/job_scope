@@ -68,12 +68,18 @@ Fill in the required fields:
 
 ### 5. Generate EC Keys for JWT Authentication
 
-Place them in `/backend/secrets`:
 
 ```bash
 openssl ecparam -genkey -name prime256v1 -noout -out backend/secrets/ec_private.pem
 openssl ec -in backend/secrets/ec_private.pem -pubout -out backend/secrets/ec_public.pem
 ```
+
+or 
+```bash
+pip install cryptography
+python generate_es256.py
+```
+Place them in `/backend/secrets`
 
 ### 6. Start the Development Environment
 
@@ -81,12 +87,29 @@ openssl ec -in backend/secrets/ec_private.pem -pubout -out backend/secrets/ec_pu
 docker-compose -f docker-compose.dev.yml -p job_scope --env-file=.env.dev up --build -d
 ```
 
-### 7. Run Unit and Functional Tests
+### 7. Apply migrations
+
+```bash
+docker-compose -f docker-compose.dev.yml -p job_scope --env-file=.env.dev exec app alembic upgrade head
+```
+
+### 8. Create superuser
+
+```bash
+docker-compose -f docker-compose.dev.yml -p job_scope --env-file=.env.dev exec app python scripts/create_superuser.py ADMIN_EMAIL YOUR_PASSWORD
+```
+
+### 9. Create Elasticsearch indices
+
+```bash
+docker-compose -f docker-compose.dev.yml -p job_scope --env-file=.env.dev exec app python scripts/create_elastic_indices.py
+```
+
+### 10. Run Unit and Functional Tests
 
 ```bash
 docker-compose -f docker-compose.dev.yml -p job_scope --env-file=.env.dev exec app bash -c "pytest -s tests/functional tests/unit"
 ```
-
 ---
 
 ## 🧪 Testing Setup
@@ -112,3 +135,37 @@ docker-compose -f docker-compose.test.yml -p job_scope_test --env-file=.env.test
 ```
 
 ---
+## 🛠 Makefile
+
+The project includes a `Makefile` to simplify Docker Compose operations.
+
+### Test Environment
+
+- `make test-up` — start test containers (`docker-compose.test.yml`)
+- `make test-down` — stop and remove test containers/volumes
+- `make test-restart` — restart test containers
+- `make test-pytest` — run all tests
+- `make test-integration` — run integration tests only
+- `make test-psql` — open PostgreSQL shell
+- `make test-redis` — open Redis CLI
+- `make test-py` — open Python asyncio shell
+
+### Development Environment
+
+- `make dev-up` — start dev containers (`docker-compose.dev.yml`)
+- `make dev-down` — stop dev containers
+- `make dev-restart` — restart dev containers
+- `make dev-pytest` — run functional and unit tests
+- `make dev-psql` — open PostgreSQL shell
+- `make dev-migrate` — apply alembic migrations
+- `make dev-redis` — open Redis CLI
+- `make dev-py` — open Python asyncio shell
+- `make dev-superuser email=ADMIN_EMAIL password=YOUR_PASSWORD` — create superuser
+- `make dev-elastic-indices` — create Elasticsearch indices
+
+### Utility
+
+- `make structure` — print current project structure
+
+> ⚠️ `make` must be installed and available in your terminal.  
+> On Windows, use WSL or install via Chocolatey: `choco install make`.
