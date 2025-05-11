@@ -12,7 +12,7 @@ from src.utils.datetimes import get_timezone_now
 from src.vacancies.domain.dtos import VacancySource
 
 
-class Vacancy(Base):
+class VacancyDB(Base):
     __tablename__ = 'vacancies'
 
     id: Mapped[uuid.UUID] = mapped_column(

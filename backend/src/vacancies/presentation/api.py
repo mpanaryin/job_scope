@@ -16,7 +16,11 @@ vacancy_api_router = APIRouter()
 
 
 @vacancy_api_router.get("/search")
-async def search(query: Annotated[VacancySearchQuery, Query()], search_repo: VacancySearchRepoDep, auth: TokenAuthDep):
+async def search(
+    query: Annotated[VacancySearchQuery, Query()],
+    search_repo: VacancySearchRepoDep,
+    auth: TokenAuthDep
+):
     """
     Search for vacancies using full-text filters and parameters.
     """

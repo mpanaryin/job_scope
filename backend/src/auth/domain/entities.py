@@ -30,13 +30,11 @@ class TokenData(CustomModel):
 class AnonymousUser(CustomModel):
     """
     Represents a guest or unauthenticated user.
-
-    Used as a placeholder when no authenticated user is associated with the request.
     """
     id: None = None
     email: None = None
     hashed_password: None = None
-    is_active: bool = True
+    is_active: bool = False
     is_superuser: bool = False
     is_verified: bool = False
 

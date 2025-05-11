@@ -1,7 +1,7 @@
 from elasticsearch import AsyncElasticsearch
 
 from src.core.config import settings
-from src.vacancies.infrastructure.elastic.mappings import VACANCY_MAPPING
+from src.vacancies.infrastructure.elastic.mappings import VACANCY_INDEX_MAPPING
 
 
 async def create_vacancy_index():
@@ -14,7 +14,7 @@ async def create_vacancy_index():
     :return: Result of the Elasticsearch index creation.
     """
     async with AsyncElasticsearch(settings.ELASTICSEARCH_HOSTS) as es:
-        result = await es.indices.create(index="vacancies", body=VACANCY_MAPPING, ignore=400)
+        result = await es.indices.create(index="vacancies", body=VACANCY_INDEX_MAPPING, ignore=400)
         return result
 
 

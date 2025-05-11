@@ -1,5 +1,5 @@
 from src.users.domain.entities import User
-from src.users.domain.interfaces import IUserUnitOfWork
+from src.users.domain.interfaces.user_uow import IUserUnitOfWork
 
 
 async def get_user_profile(

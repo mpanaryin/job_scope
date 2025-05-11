@@ -7,8 +7,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.core.domain.entities import BulkResult
 from src.vacancies.application.mappers.vacancies import VacancyDomainToDTOMapper
 from src.vacancies.domain.entities import Vacancy
-from src.vacancies.domain.interfaces import IVacancyRepository
-from src.vacancies.infrastructure.db import orm
+from src.vacancies.domain.interfaces.vacancy_repo import IVacancyRepository
+from src.vacancies.infrastructure.db.orm import VacancyDB
 
 logger = logging.getLogger(__name__)
 
@@ -32,6 +32,7 @@ class PGVacancyRepository(IVacancyRepository):
         """
         super().__init__()
         self.session = session
+        self._mapper = VacancyDomainToDTOMapper()
 
     async def bulk_add_or_update(self, vacancies: list[Vacancy]) -> BulkResult:
         """
@@ -43,8 +44,8 @@ class PGVacancyRepository(IVacancyRepository):
         :param vacancies: List of normalized Vacancy domain models.
         :return: BulkResult summarizing the number of created and updated rows.
         """
-        vacancies = VacancyDomainToDTOMapper().map(vacancies)
-        stmt = insert(orm.Vacancy).values([vacancy.model_dump() for vacancy in vacancies])
+        vacancies = self._mapper.map(vacancies)
+        stmt = insert(VacancyDB).values([vacancy.model_dump() for vacancy in vacancies])
         stmt = stmt.on_conflict_do_update(
             index_elements=["source_name", "source_id"],
             set_={
@@ -66,12 +67,13 @@ class PGVacancyRepository(IVacancyRepository):
                 "type": stmt.excluded.type,
                 "meta": stmt.excluded.meta,
             },
-        ).returning(orm.Vacancy.id, orm.Vacancy.updated_at, orm.Vacancy.created_at)
+        ).returning(VacancyDB.id, VacancyDB.updated_at, VacancyDB.created_at)
         result = await self.session.execute(stmt)
         rows = result.fetchall()
         return self._build_bulk_result(rows, total=len(vacancies))
 
-    def _build_bulk_result(self, rows: Sequence[Any], total: int) -> BulkResult:
+    @staticmethod
+    def _build_bulk_result(rows: Sequence[Any], total: int) -> BulkResult:
         """
         Determine how many records were created vs updated.
 

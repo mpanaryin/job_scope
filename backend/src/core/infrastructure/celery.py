@@ -29,6 +29,6 @@ celery_app.autodiscover_tasks(["src.vacancies.presentation.tasks"])
 # celery_app.conf.beat_schedule = {
 #     "fetch_vacancies_every_10_min": {
 #         "task": "src.vacancies.presentation.tasks.collect_vacancies_task",
-#         "schedule": 60.0  # каждые 1 мин
+#         "schedule": 600.0  # каждые 10 мин
 #     }
 # }

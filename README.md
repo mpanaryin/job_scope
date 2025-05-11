@@ -1,13 +1,10 @@
-# 💼 Job Scope – Clean Architecture FastAPI Template
+# 💼 Job Scope – Clean Architecture FastAPI Example
 
 ## Introduction
 
 The main goal of this project is to provide a high-quality template demonstrating best practices in software 
 development, including **SOLID principles**, **Clean Architecture**, **modularity**, **clearly defined boundaries**, 
 and **explicit naming conventions**.
-
-Unlike typical Clean Architecture examples found online, which often only illustrate basic CRUD operations within a 
-single module, this project aims to showcase **realistic interactions** and **production-grade complexity**.
 
 This project serves as a reference and educational example rather than a plug-and-play template.
 
@@ -40,7 +37,7 @@ This project serves as a reference and educational example rather than a plug-an
 | **Search Engine**    | Elasticsearch                                              |
 | **Infrastructure**   | Docker, Docker Compose                                     |
 | **Logging**          | Filebeat → Logstash → Elasticsearch → Kibana (ELK Stack)   |
-| **Monitoring**       | Prometheus, Grafana                                        |
+| **Monitoring**       | Prometheus, Grafana, Flower                                |
 | **Web Server**       | Nginx                                                      |
 | **Admin UI**         | `sqladmin`                                                 |
 | **HTML Templates**   | Jinja2                                                     |
@@ -69,8 +66,7 @@ This project serves as a reference and educational example rather than a plug-an
 ### Supporting Files
 
 - `docker-compose.*.yml`, `.env.*`: Environment and deployment configs.
-- `create_module.py`: Generator for FastAPI modules following project structure.
-- `print_structure.py`: Print a visual representation of the current directory structure.
+- `tools/print_structure.py`: Print a visual representation of the project directory structure.
 
 ---
 
@@ -87,13 +83,13 @@ This project serves as a reference and educational example rather than a plug-an
 ### Internal Modules (`src/`)
 
 - `auth/`: Everything related to authentication and authorization.
-- `core/`: Shared code: clients, middleware, constants, configuration, etc.
+- `core/`: Shared code: clients, constants, configuration, etc.
 - `crud/`: A helper module for standard CRUD generation (non-Clean Architecture).
 - `db/`: Database engine and session configuration.
-- `integrations/`: Abstractions and adapters for third-party API integrations.
+- `integrations/`: Encapsulates logic for interacting with third-party services and APIs.
 - `templates/`: Jinja2 templates for HTML rendering.
 - `users/`: User management features.
-- `utils/`: General-purpose helper functions.
+- `utils/`: General-purpose utils functions.
 - `vacancies/`: Logic related to job vacancy collection and handling.
 
 ---
@@ -138,7 +134,7 @@ Each feature module using Clean Architecture includes:
 - `functional/`: Logic testing using mocks and fake infrastructure (no real DB or services).
 - `integration/`: Tests with real services, often via a test-specific Docker Compose.
 - `conftest.py`: Shared test configuration and fixtures.
-- `utils.py`: Helpers for reusable test code.
+- `utils.py`: Utils for reusable test code.
 
 ---
 
@@ -152,12 +148,7 @@ This application is designed to collect and process job vacancies from external 
    - Base model with timezone-aware datetime parsing.
    - Redis/Elastic clients.
    - Shared exceptions.
-   - Middleware:
-     - `JWTRefreshMiddleware`: auto-refresh access tokens via refresh tokens.
-     - `AuthenticationMiddleware`: injects User/AnonymousUser into request.
-     - `SecurityMiddleware`: Restricts access to protected routes for non-superusers unless
-     the path is explicitly allowed.
-   - Configuration management (environment, logging, and application settings)
+   - Configuration management (environment, logging, and application settings).
 
 2. **CRUD**:
    - Provides quick setup for CRUD endpoints.
@@ -178,6 +169,11 @@ This application is designed to collect and process job vacancies from external 
    - Supports cookie/header/both transport.
    - Tokens stored in Redis and revocable.
    - `@access_control` decorator for per-route permission handling (superuser, open, authenticated).
+   - Middleware:
+     - `JWTRefreshMiddleware`: auto-refresh access tokens via refresh tokens.
+     - `AuthenticationMiddleware`: injects User/AnonymousUser into request.
+     - `SecurityMiddleware`: Restricts access to protected routes for non-superusers unless
+     the path is explicitly allowed.
 
 6. **Vacancies**:
    - Aggregates vacancies via Celery tasks.
@@ -266,5 +262,5 @@ See the [License](LICENSE) file for details.
 ---
 
 ## 👤 Author
-Created and maintained by @mapanryin  
+Created and maintained by [@mapanryin](https://github.com/mpanaryin)
 Pull requests and contributions are welcome!

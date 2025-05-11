@@ -1,5 +1,5 @@
 global:
-  scrape_interval: 15s # как часто Prometheus запрашивает метрики (по умолчанию — 1m)
+  scrape_interval: 15s  # как часто Prometheus запрашивает метрики (по умолчанию — 1m)
   evaluation_interval: 15s  # как часто Prometheus пересчитывает правила алертинга
 
 scrape_configs:

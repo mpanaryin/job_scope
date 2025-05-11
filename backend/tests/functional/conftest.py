@@ -2,7 +2,7 @@ from unittest.mock import MagicMock, AsyncMock
 
 import pytest
 
-from src.auth.infrastructure.services.password import BcryptPasswordHasher
+from src.users.infrastructure.services.password_hasher import BcryptPasswordHasher
 from src.main import app
 from src.users.presentation.dependencies import get_user_uow
 from tests.fakes.users import FakeUserUnitOfWork

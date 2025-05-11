@@ -1,4 +1,4 @@
-VACANCY_MAPPING = {
+VACANCY_INDEX_MAPPING = {
     "mappings": {
         "properties": {
             "id": {"type": "keyword"},

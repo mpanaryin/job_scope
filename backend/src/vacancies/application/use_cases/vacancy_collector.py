@@ -1,8 +1,8 @@
 from src.core.domain.entities import BulkResult
-from src.integrations.domain.interfaces import TSearchParams, IVacancySourceClient, TVacancy
-from src.vacancies.application.mappers.vacancies import VacancyAPIToDomainMapper
 from src.vacancies.domain.entities import Vacancy
-from src.vacancies.domain.interfaces import IVacancySearchRepository, IVacancyUnitOfWork
+from src.vacancies.domain.interfaces.vacancy_search_repo import IVacancySearchRepository
+from src.vacancies.domain.interfaces.vacancy_source_client import TSearchParams, IVacancySourceClient
+from src.vacancies.domain.interfaces.vacancy_uow import IVacancyUnitOfWork
 
 
 async def collect_all_vacancies(
@@ -21,8 +21,7 @@ async def collect_all_vacancies(
     :param search_repo: Search engine repository (e.g. Elasticsearch) implementing IVacancySearchRepository.
     :return: Dictionary containing bulk operation results for database and search storage.
     """
-    vacancies: list[TVacancy] = await client.get_all_vacancies(search_params)
-    vacancies: list[Vacancy] = VacancyAPIToDomainMapper().map(vacancies)
+    vacancies: list[Vacancy] = await client.get_all_vacancies(search_params)
 
     db_result = await collect_vacancies_to_db(vacancies, uow)
     search_db_result = await collect_vacancies_to_search(vacancies, search_repo)
@@ -49,8 +48,7 @@ async def collect_vacancies(
     :param search_repo: Search engine repository (e.g. Elasticsearch) implementing IVacancySearchRepository.
     :return: Dictionary containing bulk operation results for database and search storage.
     """
-    vacancies: list[TVacancy] = await client.get_vacancies(search_params)
-    vacancies: list[Vacancy] = VacancyAPIToDomainMapper().map(vacancies)
+    vacancies: list[Vacancy] = await client.get_vacancies(search_params)
 
     db_result = await collect_vacancies_to_db(vacancies, uow)
     search_db_result = await collect_vacancies_to_search(vacancies, search_repo)
@@ -62,7 +60,10 @@ async def collect_vacancies(
     return statistics
 
 
-async def collect_vacancies_to_db(vacancies: list[Vacancy], uow: IVacancyUnitOfWork) -> BulkResult:
+async def collect_vacancies_to_db(
+    vacancies: list[Vacancy],
+    uow: IVacancyUnitOfWork
+) -> BulkResult:
     """
     Store vacancies in the relational database using the given Unit of Work.
 

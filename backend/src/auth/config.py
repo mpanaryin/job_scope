@@ -1,4 +1,3 @@
-import os
 from functools import cached_property
 from typing import Literal
 
@@ -11,7 +10,7 @@ class AuthConfig(BaseSettings):
     Configuration for JWT-based authentication.
 
     This class manages all JWT-related settings, including algorithm,
-    token expiration, key paths, and token transport settings.
+    token expiration, key paths, and token transports settings.
 
     Attributes:
         JWT_ALGORITHM: Algorithm used for signing tokens (e.g., ES256).

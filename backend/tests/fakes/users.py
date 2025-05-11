@@ -1,6 +1,7 @@
 from src.users.domain.entities import UserCreate, User, UserUpdate
 from src.users.domain.exceptions import UserNotFound
-from src.users.domain.interfaces import IUserRepository, IUserUnitOfWork
+from src.users.domain.interfaces.user_repo import IUserRepository
+from src.users.domain.interfaces.user_uow import IUserUnitOfWork
 
 
 class FakeUserRepository(IUserRepository):

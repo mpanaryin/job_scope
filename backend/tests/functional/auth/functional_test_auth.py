@@ -18,6 +18,11 @@ user_create_data = UserCreate(
 
 @pytest.mark.asyncio
 async def test_login_success(set_fake_check_password, client: httpx.AsyncClient, mock_auth, fake_user_uow):
+    """
+    Test successful login with valid credentials.
+
+    Verifies that tokens are set and the response is successful.
+    """
     set_fake_check_password(True)
     async with override_dependencies({get_token_auth: lambda: mock_auth, get_user_uow: lambda: fake_user_uow}):
         await fake_user_uow.users.add(user_create_data)
@@ -33,6 +38,11 @@ async def test_login_success(set_fake_check_password, client: httpx.AsyncClient,
 
 @pytest.mark.asyncio
 async def test_login_invalid_password(set_fake_check_password, client: httpx.AsyncClient, mock_auth, fake_user_uow):
+    """
+    Test login with an invalid password.
+
+    Ensures that the login fails with 401 and proper error message.
+    """
     set_fake_check_password(False)
     async with override_dependencies({get_token_auth: lambda: mock_auth, get_user_uow: lambda: fake_user_uow}):
         await fake_user_uow.users.add(user_create_data)
@@ -47,6 +57,11 @@ async def test_login_invalid_password(set_fake_check_password, client: httpx.Asy
 
 @pytest.mark.asyncio
 async def test_logout(client: httpx.AsyncClient, mock_auth):
+    """
+    Test logout operation.
+
+    Verifies that tokens are unset and the correct response is returned.
+    """
     async with override_dependencies({get_token_auth: lambda: mock_auth}):
         response = await client.post("/api/auth/logout")
         assert response.status_code == 200
@@ -56,6 +71,11 @@ async def test_logout(client: httpx.AsyncClient, mock_auth):
 
 @pytest.mark.asyncio
 async def test_refresh_access_token(client: httpx.AsyncClient, mock_auth):
+    """
+    Test access token refresh.
+
+    Ensures that a new access token is issued and the operation succeeds.
+    """
     async with override_dependencies({get_token_auth: lambda: mock_auth}):
         response = await client.post("/api/auth/refresh")
         assert response.status_code == 200
@@ -65,6 +85,11 @@ async def test_refresh_access_token(client: httpx.AsyncClient, mock_auth):
 
 @pytest.mark.asyncio
 async def test_revoke_user_tokens_by_superuser(client: httpx.AsyncClient, mock_auth):
+    """
+    Test token revocation by a superuser.
+
+    Verifies that a superuser can revoke tokens for another user.
+    """
     mock_auth.request.state.user = User(
         id=1, email="superuser@mail.com",
         hashed_password="securepassword!1_hashed",
@@ -80,6 +105,11 @@ async def test_revoke_user_tokens_by_superuser(client: httpx.AsyncClient, mock_a
 
 @pytest.mark.asyncio
 async def test_revoke_user_by_anon(client: httpx.AsyncClient, mock_auth):
+    """
+    Test that anonymous user cannot revoke tokens.
+
+    Ensures that the operation is forbidden and returns 403.
+    """
     mock_auth.request.state.user = AnonymousUser()
     async with override_dependencies({get_token_auth: lambda: mock_auth}):
         user_id = 1

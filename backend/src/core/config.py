@@ -1,6 +1,5 @@
 import os
-import secrets
-from typing import Any, Literal
+from typing import Literal
 
 from pydantic import AnyHttpUrl, EmailStr, PostgresDsn, field_validator, ValidationInfo, AnyUrl, ConfigDict
 from pydantic_settings import BaseSettings
@@ -91,20 +90,6 @@ class Settings(BaseSettings):
     SMTP_USER: str | None = None
     SMTP_PASSWORD: str | None = None
     EMAIL_FROM: EmailStr | None = None
-
-    EMAIL_RESET_TOKEN_EXPIRE_HOURS: int = 48
-    EMAIL_TEMPLATES_DIR: str = "/src/src/email-templates/build"
-    EMAILS_ENABLED: bool = False
-
-    @field_validator("EMAILS_ENABLED")
-    def get_emails_enabled(cls, v: bool, info: ValidationInfo) -> bool:
-        return bool(
-            info.data.get("SMTP_HOST")
-            and info.data.get("SMTP_PORT")
-            and info.data.get("EMAILS_FROM_EMAIL")
-        )
-
-    EMAIL_TEST_USER: EmailStr = "mytest@example.com"  # type: ignore
 
     model_config = ConfigDict()
 

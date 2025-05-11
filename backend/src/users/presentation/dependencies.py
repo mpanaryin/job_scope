@@ -2,7 +2,7 @@ from typing import Annotated
 
 from fastapi import Depends
 
-from src.users.domain.interfaces import IUserUnitOfWork
+from src.users.domain.interfaces.user_uow import IUserUnitOfWork
 from src.users.infrastructure.db.unit_of_work import PGUserUnitOfWork
 
 

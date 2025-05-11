@@ -6,7 +6,7 @@ from sqlalchemy.exc import IntegrityError
 from starlette.requests import Request
 
 from src.auth.presentation.permissions import access_control
-from src.core.domain.exceptions import AlreadyExists, NotFound
+from src.core.domain.exceptions.exceptions import AlreadyExists, NotFound
 from src.crud.base import CRUDBase
 
 Schema = TypeVar("Schema", bound=BaseModel)

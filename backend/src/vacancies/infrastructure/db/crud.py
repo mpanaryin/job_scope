@@ -2,7 +2,7 @@ from src.crud.base import CRUDBase
 from src.vacancies.infrastructure.db import orm
 
 
-class VacancyService(CRUDBase, model=orm.Vacancy):
+class VacancyService(CRUDBase, model=orm.VacancyDB):
     """
     Service layer for managing Vacancy CRUD operations.
 

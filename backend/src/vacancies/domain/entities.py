@@ -39,7 +39,6 @@ class Address(CustomModel):
     metro_stations: list[MetroStation] | None = None
 
 
-
 class Area(CustomModel):
     name: str | None = None
     url: str | None = None

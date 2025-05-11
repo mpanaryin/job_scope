@@ -1,5 +1,5 @@
 from src.auth.domain.entities import TokenData
-from src.auth.domain.interfaces import ITokenStorage
+from src.auth.domain.interfaces.token_storage import ITokenStorage
 from src.utils.datetimes import get_timezone_now
 from src.core.infrastructure.clients.redis import get_redis_client
 

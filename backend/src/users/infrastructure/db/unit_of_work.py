@@ -1,7 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.db.engine import async_session_maker
-from src.users.domain.interfaces import IUserUnitOfWork
+from src.users.domain.interfaces.user_uow import IUserUnitOfWork
 from src.users.infrastructure.db.repositories import PGUserRepository
 
 

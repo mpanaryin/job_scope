@@ -2,9 +2,9 @@ from elasticsearch import helpers
 
 from src.core.domain.entities import BulkResult
 from src.core.infrastructure.clients.elastic import get_elastic_client
-from src.vacancies.application.mappers.vacancies import VacancyDomainToElasticMapper
+from src.vacancies.domain.interfaces.vacancy_search_repo import IVacancySearchRepository
+from src.vacancies.infrastructure.elastic.mappers import VacancyDomainToElasticMapper
 from src.vacancies.domain.entities import Vacancy, VacancySearchQuery
-from src.vacancies.domain.interfaces import IVacancySearchRepository
 
 
 class ESVacancySearchRepository(IVacancySearchRepository):
@@ -22,6 +22,7 @@ class ESVacancySearchRepository(IVacancySearchRepository):
         Initialize the search repository with an Elasticsearch client.
         """
         self.es_client = get_elastic_client()
+        self._mapper = VacancyDomainToElasticMapper()
 
     async def bulk_add(self, vacancies: list[Vacancy]) -> BulkResult:
         """
@@ -30,7 +31,7 @@ class ESVacancySearchRepository(IVacancySearchRepository):
         :param vacancies: List of domain-level Vacancy models.
         :return: BulkResult with counts of successful and failed operations.
         """
-        vacancies = VacancyDomainToElasticMapper().map(vacancies)
+        vacancies = self._mapper.map(vacancies)
         success, failed = await helpers.async_bulk(self.es_client, vacancies)
         return BulkResult(success=success, failed=failed, total=len(vacancies))
 

@@ -6,7 +6,7 @@ from src.core.config import settings
 from src.db.base import Base
 # Import models required for database initialization
 from src.users.infrastructure.db.orm import UserDB
-from src.vacancies.infrastructure.db.orm import Vacancy
+from src.vacancies.infrastructure.db.orm import VacancyDB
 
 config = context.config
 fileConfig(config.config_file_name)

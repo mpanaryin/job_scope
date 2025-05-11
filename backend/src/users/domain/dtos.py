@@ -4,6 +4,7 @@ from pydantic import Field, field_validator
 
 from src.core.domain.constants import STRONG_PASSWORD_PATTERN
 from src.core.domain.entities import CustomModel
+from src.users.domain.entities import UserUpdate
 
 
 class UserReadDTO(CustomModel):
@@ -64,8 +65,7 @@ class UserCreateDTO(CustomModel):
                 "Password must contain at least "
                 "one lower character, "
                 "one upper character, "
-                "digit or "
-                "special symbol"
+                "digit or special symbol"
             )
 
         return password
@@ -88,3 +88,5 @@ class UserUpdateDTO(CustomModel):
     is_superuser: bool | None = False
     is_verified: bool | None = False
 
+    def to_entity(self, user_id: int):
+        return UserUpdate(id=user_id, **self.model_dump(exclude_unset=True))

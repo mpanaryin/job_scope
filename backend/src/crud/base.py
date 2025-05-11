@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker
 from sqlalchemy.orm import sessionmaker, ColumnProperty, RelationshipProperty, InstrumentedAttribute, selectinload
 from starlette.requests import Request
 
-from src.crud.utils import get_primary_keys, slugify_class_name, prettify_class_name, get_column_python_type, \
+from src.crud.helpers import get_primary_keys, slugify_class_name, prettify_class_name, get_column_python_type, \
     object_identifier_values, is_falsy_value, get_direction
 from src.db.engine import async_session_maker
 
